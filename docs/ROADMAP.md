@@ -34,7 +34,7 @@ inatividade; Luísa com provedor configurável, padrão DeepSeek.
 
 **Falta** (precisa de conta ou senha — SETUP.md):
 
-- [ ] Baixar as 4 imagens do Lovable (A2) — aguarda o OK do Bruno
+- [x] 4 imagens trazidas do Lovable para `public/images/` (A2)
 - [ ] Decidir de quem são as contas (GitHub, Vercel, Supabase). Recomendo no nome da Tayane, com o
       Bruno como colaborador
 - [ ] Export dos dados com a senha dela → Supabase novo → migrations → import (SETUP 1–3)

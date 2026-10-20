@@ -105,8 +105,7 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
   propõe; gravar exige confirmação, reservada de forma atômica (`action->>status = 'pendente'`).
 - **Dados não estão no repo**: perfis dos pets, recorrências, contracheques e dívidas existem só no
   banco; não há tela para criar perfil de pet nem contracheque. Backup = workflow `backup`.
-- **4 imagens da página Meus Filhos** (`src/assets/pets/*.asset.json`) ainda apontam para o CDN do
-  Lovable — ver ACHADOS A2.
+- **Fotos ficam em `public/images/`**: trocar o arquivo mantendo o nome troca a foto no app.
 - `AGENTS.md` tem as decisões de design de domínio; `roadmap.md` é o histórico do Lovable.
 - npm trava na máquina do Bruno por `cafile` do Kaspersky no `~/.npmrc` (`UNABLE_TO_GET_ISSUER_CERT_LOCALLY`);
   use bun com `--cafile=<bundle com os CAs do Node + o do Kaspersky>`.
@@ -115,7 +114,7 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 
 Plano completo em [docs/ROADMAP.md](docs/ROADMAP.md). Resumo:
 
-- [ ] Fase 1 — pôr no ar: seguir [docs/SETUP.md](docs/SETUP.md) (contas, export/import, Vercel) + 4 imagens (A2)
+- [ ] Fase 1 — pôr no ar: seguir [docs/SETUP.md](docs/SETUP.md) (contas, export/import, Vercel)
 - [x] Fase 2 — consertos 🔴/🟠 que não dependem das contas (ver ACHADOS)
 - [ ] Fase 3 — deixar fácil de mudar (tema/conteúdo/imagens num lugar só)
 - [ ] Fase 4 — Luísa: criar a chave DeepSeek e validar com uso real

@@ -16,15 +16,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import gardenScene from "@/assets/pets/jardim-garden.jpg.asset.json";
-import dobbyPortrait from "@/assets/pets/jardim-dobby.jpg.asset.json";
-import zaraPortrait from "@/assets/pets/jardim-zara.jpg.asset.json";
-import pacoPortrait from "@/assets/pets/jardim-paco.jpg.asset.json";
-
+// Fotos em public/images/: trocar o arquivo (mesmo nome) troca a foto no app.
+const GARDEN_SCENE = "/images/jardim-garden.jpg";
 const portraits: Record<string, string> = {
-  dobby: dobbyPortrait.url,
-  zara: zaraPortrait.url,
-  paco: pacoPortrait.url,
+  dobby: "/images/jardim-dobby.jpg",
+  zara: "/images/jardim-zara.jpg",
+  paco: "/images/jardim-paco.jpg",
 };
 const SIZE: Record<string, string> = { dobby: "Pequeno", paco: "Pequeno", zara: "Médio" };
 import { supabase } from "@/integrations/supabase/client";
@@ -270,7 +267,7 @@ export function PetsModule() {
     <div className="garden-module space-y-5">
       <div className="garden-hero relative overflow-hidden rounded-[28px]">
         <img
-          src={gardenScene.url}
+          src={GARDEN_SCENE}
           alt="Jardim ilustrado com Paco, Dobby e Zara deitados na grama"
           className="block h-auto w-full"
           width={1448}

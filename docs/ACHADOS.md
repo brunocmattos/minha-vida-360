@@ -7,6 +7,7 @@ Levantamento de 2026-10-20: teste funcional logado contra um Supabase local + le
 
 **✅ Resolvidos no código** (com testes; 69 passando):
 
+- A2 as 4 imagens agora estão em `public/images/` (baixadas do Lovable, conferidas).
 - A1 Luísa com provedor próprio configurável (padrão DeepSeek) — falta só criar a chave (SETUP passo 6).
 - A3 Scripts de export/import testados ponta a ponta (troca de dono, transação, contagens conferidas);
   backup automático a cada 3 dias. Falta **rodar** com a senha dela (SETUP passos 1 e 3).
@@ -23,7 +24,6 @@ Levantamento de 2026-10-20: teste funcional logado contra um Supabase local + le
 
 **⏳ Ainda abertos**
 
-- A2 4 imagens — baixar do Lovable (aguarda o OK do Bruno).
 - A4 cadastro público — desligar no painel do Supabase novo (SETUP passo 2).
 - B7 restos: observações não ficam na recorrência (não há coluna); data no passado gera meses
   vencidos; salvar recorrência de novo após falha na geração pode duplicar.
