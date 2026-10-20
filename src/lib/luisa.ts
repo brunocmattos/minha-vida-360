@@ -26,22 +26,30 @@ function cleanAmount(v: unknown): number | undefined {
   return Math.round(n * 100) / 100;
 }
 
-function cleanDate(v: unknown): string | undefined {
+/** Aceita só datas reais: o JS "rola" 2026-02-31 para março, então conferimos a ida e volta. */
+export function cleanDate(v: unknown): string | undefined {
   if (typeof v !== "string" || !ISO_DATE.test(v)) return undefined;
   const d = new Date(`${v}T12:00:00Z`);
-  return Number.isNaN(d.getTime()) ? undefined : v;
+  return Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== v ? undefined : v;
 }
 
-/** Sanitiza a ação devolvida pelo modelo. Retorna null se a intenção não for gravável. */
-export function validateLuisaAction(raw: unknown): LuisaAction | null {
+const STATUSES: LuisaAction["status"][] = ["pendente", "confirmada", "cancelada"];
+
+/**
+ * Sanitiza uma ação. Retorna null se a intenção não for gravável.
+ * Saída nova do modelo → sempre "pendente". Ação já gravada no banco (`stored`) → mantém o status salvo.
+ */
+export function validateLuisaAction(raw: unknown, stored = false): LuisaAction | null {
   if (raw == null || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const type = r["type"];
+  const st = STATUSES.find((s) => s === r["status"]);
+  const status = stored && st ? st : "pendente";
   if (type === "criar_despesa") {
     const description = cleanText(r["description"], 120);
     const amount = cleanAmount(r["amount"]);
     if (!description || amount == null) return null; // falta dado → a Luísa pergunta no texto
-    return { type, description, amount, date: cleanDate(r["date"]), status: "pendente" };
+    return { type, description, amount, date: cleanDate(r["date"]), status };
   }
   if (type === "registrar_diario") {
     const content = cleanText(r["content"], 2000);
@@ -51,11 +59,13 @@ export function validateLuisaAction(raw: unknown): LuisaAction | null {
       content,
       date: cleanDate(r["date"]),
       area_slug: cleanText(r["area_slug"], 40),
-      status: "pendente",
+      status,
     };
   }
   return null;
 }
+
+const FALLBACK_REPLY = "Tive um problema para responder. Tente de novo?";
 
 /** Interpreta a saída JSON do modelo: { reply, action? }. Nunca lança. */
 export function parseLuisaOutput(raw: unknown): { reply: string; action: LuisaAction | null } {
@@ -65,10 +75,38 @@ export function parseLuisaOutput(raw: unknown): { reply: string; action: LuisaAc
   return { reply, action: validateLuisaAction(obj["action"]) };
 }
 
-export function actionSummary(a: LuisaAction): string {
+/** Texto bruto devolvido pelo modelo (JSON em string). Vazio ou inválido → resposta amigável. Nunca lança. */
+export function parseLuisaContent(content: unknown): {
+  reply: string;
+  action: LuisaAction | null;
+} {
+  if (typeof content !== "string" || !content.trim())
+    return { reply: FALLBACK_REPLY, action: null };
+  try {
+    return parseLuisaOutput(JSON.parse(content));
+  } catch {
+    return { reply: FALLBACK_REPLY, action: null };
+  }
+}
+
+/** Data de hoje (aaaa-mm-dd) no fuso de São Paulo. */
+export function todaySP(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+
+/** Despesa com data futura entra como prevista (não paga); hoje ou passado, como paga. */
+export function expensePayment(amount: number, date: string, today: string) {
+  const paid = date <= today;
+  return { paid, amount_paid: paid ? amount : 0, paid_date: paid ? date : null };
+}
+
+export function actionSummary(a: LuisaAction, today: string = todaySP()): string {
   if (a.type === "criar_despesa") {
     const valor = a.amount != null ? `R$ ${a.amount.toFixed(2).replace(".", ",")}` : "a definir";
-    return `Despesa: ${a.description} — ${valor}${a.date ? ` — ${a.date.split("-").reverse().join("/")}` : ""}`;
+    const situacao = expensePayment(a.amount ?? 0, a.date ?? today, today).paid
+      ? "paga"
+      : "prevista";
+    return `Despesa: ${a.description} — ${valor}${a.date ? ` — ${a.date.split("-").reverse().join("/")}` : ""} (${situacao})`;
   }
-  return `Diário: ${a.content?.slice(0, 80)}${(a.content?.length ?? 0) > 80 ? "…" : ""}`;
+  return `Diário: ${a.content}`;
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Mic, Plus, Send, X, History } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -18,6 +19,17 @@ type Msg = {
   created_at: string;
 };
 
+type SpeechRec = {
+  lang: string;
+  interimResults: boolean;
+  onresult: ((ev: { results?: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  start(): void;
+  stop(): void;
+};
+type SpeechRecCtor = new () => SpeechRec;
+
 export function LuisaChat() {
   const [open, setOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -28,11 +40,12 @@ export function LuisaChat() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const qc = useQueryClient();
   const send = useServerFn(luisaSend);
   const confirm = useServerFn(luisaConfirm);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRec | null>(null);
   const [micSupported] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -41,20 +54,22 @@ export function LuisaChat() {
   const [listening, setListening] = useState(false);
 
   const loadConvos = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error: err } = await supabase
       .from("luisa_conversations")
       .select("id, title, updated_at")
       .order("updated_at", { ascending: false });
+    if (err) setError("Não consegui carregar suas conversas. Tente de novo.");
     setConvos(data ?? []);
     return data ?? [];
   }, []);
 
   const loadMessages = useCallback(async (id: string) => {
-    const { data } = await supabase
+    const { data, error: err } = await supabase
       .from("luisa_messages")
       .select("id, role, content, action, created_at")
       .eq("conversation_id", id)
       .order("created_at", { ascending: true });
+    if (err) setError("Não consegui carregar as mensagens. Tente de novo.");
     setMessages((data ?? []) as Msg[]);
   }, []);
 
@@ -114,6 +129,7 @@ export function LuisaChat() {
     setError(null);
     setSending(true);
     setInput("");
+    let sent = false;
     try {
       let id = activeId;
       if (!id) id = await newConversation();
@@ -130,11 +146,14 @@ export function LuisaChat() {
         void loadConvos();
       }
       void saved;
+      sent = true;
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "A Luísa não conseguiu responder agora. Tente de novo.",
       );
     } finally {
+      // Falhou: devolve o texto para a usuária não perder o que escreveu.
+      if (!sent) setInput((prev) => prev || text);
       setSending(false);
     }
   }
@@ -145,6 +164,10 @@ export function LuisaChat() {
     setError(null);
     try {
       await confirm({ data: { messageId: msg.id, approved } });
+      if (approved) {
+        void qc.invalidateQueries({ queryKey: ["fin"] });
+        void qc.invalidateQueries({ queryKey: ["diary"] });
+      }
       if (activeId) await loadMessages(activeId);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não consegui concluir a ação.");
@@ -159,11 +182,16 @@ export function LuisaChat() {
       recognitionRef.current?.stop();
       return;
     }
-    const Ctor = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+    const w = window as unknown as {
+      SpeechRecognition?: SpeechRecCtor;
+      webkitSpeechRecognition?: SpeechRecCtor;
+    };
+    const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!Ctor) return;
     const rec = new Ctor();
     rec.lang = "pt-BR";
     rec.interimResults = false;
-    rec.onresult = (ev: any) => {
+    rec.onresult = (ev) => {
       const t = ev.results?.[0]?.[0]?.transcript;
       if (t) setInput((prev) => (prev ? `${prev} ${t}` : t));
     };
@@ -232,7 +260,12 @@ export function LuisaChat() {
               <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 Conversas
               </p>
-              {convos.length === 0 && (
+              {error && (
+                <p className="mb-2 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+              {convos.length === 0 && !error && (
                 <p className="px-1 text-sm text-muted-foreground">Nenhuma conversa ainda.</p>
               )}
               <ul className="space-y-1">
@@ -277,7 +310,7 @@ export function LuisaChat() {
                   >
                     {m.role === "assistant" ? (
                       <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:m-0">
-                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                        <ReactMarkdown disallowedElements={["img"]}>{m.content}</ReactMarkdown>
                       </div>
                     ) : (
                       m.content
