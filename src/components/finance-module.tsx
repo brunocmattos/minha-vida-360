@@ -23,9 +23,10 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { CreditRecords, Payslips } from "@/components/finance-extra";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { CalendarFlow, EntryBrowser, MonthWallet } from "@/components/finance-views";
+import { CalendarFlow, EntryBrowser } from "@/components/finance-views";
 import { SoftCard, EmptyNote } from "@/components/cards";
 import { confirmDiscard } from "@/components/back-button";
+import { fetchAllRows } from "@/lib/fetch-all";
 import { todaySP, formatDue } from "@/lib/recurrence";
 import {
   addMonths,
@@ -39,7 +40,6 @@ import {
   NATURE_LABEL,
   halfHousingUpdates,
   statusLabel,
-  summarizeMonth,
   type Nature,
   type Entry,
   type Kind,
@@ -51,20 +51,30 @@ type Data = { categories: Category[]; recurrences: Recurrence[]; entries: Entry[
 const KEY = ["fin"];
 
 async function fetchAll(): Promise<Data> {
+  // paginado: o Supabase corta em 1000 linhas; o desempate por id evita páginas cruzadas
   const [c, r, e] = await Promise.all([
-    supabase.from("fin_categories").select("id,kind,name").order("name"),
-    supabase.from("fin_recurrences").select("*").order("created_at"),
-    supabase.from("fin_entries").select("*").order("due_date"),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("fin_categories")
+        .select("id,kind,name")
+        .order("name")
+        .order("id")
+        .range(from, to),
+    ),
+    fetchAllRows((from, to) =>
+      supabase.from("fin_recurrences").select("*").order("created_at").order("id").range(from, to),
+    ),
+    fetchAllRows((from, to) =>
+      supabase.from("fin_entries").select("*").order("due_date").order("id").range(from, to),
+    ),
   ]);
-  const err = c.error || r.error || e.error;
-  if (err) throw err;
   return {
-    categories: (c.data ?? []) as Category[],
-    recurrences: (r.data ?? []).map((x) => ({
+    categories: c as Category[],
+    recurrences: r.map((x) => ({
       ...x,
       amount_planned: Number(x.amount_planned),
     })) as Recurrence[],
-    entries: (e.data ?? []).map((x) => ({
+    entries: e.map((x) => ({
       ...x,
       amount_planned: Number(x.amount_planned),
       amount_paid: Number(x.amount_paid),
@@ -139,7 +149,10 @@ export function FinanceModule({
     if (active.length)
       generate(active, current)
         .then(() => qc.invalidateQueries({ queryKey: KEY }))
-        .catch((e) => setMsg(friendly(e)));
+        .catch((e) => {
+          generated.current = false; // permite tentar de novo no próximo carregamento
+          setMsg(friendly(e));
+        });
   }, [q.data, current, qc]);
 
   // Joici: previsão = 50% de aluguel+condomínio+energia+internet previstos na mesma competência. Valores já recebidos não mudam.
@@ -154,6 +167,7 @@ export function FinanceModule({
           .update({ amount_planned: u.v })
           .eq("id", u.id)
           .eq("amount_paid", 0)
+          .eq("amount_manual", false)
           .is("paid_date", null);
         if (error) throw error;
       }),
@@ -170,6 +184,12 @@ export function FinanceModule({
     },
     onError: (e) => setMsg(friendly(e)),
   });
+  // Para formulários: devolve a promessa para fechar só se salvou; o erro aparece no próprio formulário.
+  const save = (fn: () => Promise<void>) =>
+    run.mutateAsync(fn).catch((e) => {
+      setMsg(null);
+      throw e;
+    });
 
   if (q.isLoading || !today || !month || !current)
     return (
@@ -212,6 +232,7 @@ export function FinanceModule({
       categories={data.categories}
       rec={data.recurrences.find((r) => r.id === e.recurrence_id)}
       run={(fn) => run.mutate(fn)}
+      save={save}
       busy={run.isPending}
     />
   );
@@ -257,7 +278,7 @@ export function FinanceModule({
           categories={data.categories}
           busy={run.isPending}
           onSave={(row, rec) =>
-            run.mutate(async () => {
+            save(async () => {
               if (rec) {
                 const { data: r, error } = await supabase
                   .from("fin_recurrences")
@@ -395,12 +416,20 @@ export function FinanceModule({
                   {projection(data.entries, month).map((p) => (
                     <tr key={p.month} className="border-t">
                       <td className="py-3 capitalize">{monthLabel(p.month)}</td>
-                      <td className="text-income">{formatBRL(p.plannedIn)}</td>
-                      <td className="text-expense">{formatBRL(p.plannedOut)}</td>
-                      <td className={p.balance < 0 ? "text-expense" : "text-primary"}>
-                        {formatBRL(p.balance)}
-                      </td>
-                      <td className="text-muted-foreground">{formatBRL(p.benefit)}</td>
+                      {p.count === 0 ? (
+                        <td colSpan={4} className="text-muted-foreground">
+                          Ainda não gerado
+                        </td>
+                      ) : (
+                        <>
+                          <td className="text-income">{formatBRL(p.plannedIn)}</td>
+                          <td className="text-expense">{formatBRL(p.plannedOut)}</td>
+                          <td className={p.balance < 0 ? "text-expense" : "text-primary"}>
+                            {formatBRL(p.balance)}
+                          </td>
+                          <td className="text-muted-foreground">{formatBRL(p.benefit)}</td>
+                        </>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -411,7 +440,7 @@ export function FinanceModule({
             recs={data.recurrences.filter((r) => r.frequency === "periodica")}
             entries={data.entries}
             busy={run.isPending}
-            run={(fn) => run.mutate(fn)}
+            save={save}
           />
           <SavingsGoals />
         </>
@@ -502,7 +531,7 @@ export function FinanceModule({
           recs={data.recurrences.filter((r) => r.frequency === "periodica")}
           entries={data.entries}
           busy={run.isPending}
-          run={(fn) => run.mutate(fn)}
+          save={save}
         />
       )}
       {(page === "receitas" || page === "despesas") && tab === "settings" && (
@@ -510,17 +539,9 @@ export function FinanceModule({
           categories={data.categories}
           busy={run.isPending}
           run={(fn) => run.mutate(fn)}
+          save={save}
         />
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-md border bg-card p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-base font-bold">{formatBRL(value)}</p>
     </div>
   );
 }
@@ -544,7 +565,7 @@ function EntryForm({
   defaultKind?: Kind;
   categories: Category[];
   busy: boolean;
-  onSave: (r: Row, recurring: boolean) => void;
+  onSave: (r: Row, recurring: boolean) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<Kind>(defaultKind);
@@ -582,25 +603,29 @@ function EntryForm({
         <Plus className="size-4" /> Novo lançamento
       </Button>
     );
-  const submit = () => {
+  const submit = async () => {
     const v = parseBRL(amount);
     if (!desc.trim()) return setErr("Informe uma descrição.");
     if (v === null) return setErr("Valor previsto inválido. Use, por exemplo, 150,00.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(due)) return setErr("Informe a data de vencimento.");
     setErr(null);
-    onSave(
-      {
-        nature,
-        kind,
-        category_id: cat || null,
-        description: desc.trim(),
-        amount_planned: v,
-        due_date: due,
-        notes: notes.trim() || null,
-      },
-      rec,
-    );
-    reset();
+    try {
+      await onSave(
+        {
+          nature,
+          kind,
+          category_id: cat || null,
+          description: desc.trim(),
+          amount_planned: v,
+          due_date: due,
+          notes: notes.trim() || null,
+        },
+        rec,
+      );
+      reset();
+    } catch (e) {
+      setErr(friendly(e));
+    }
   };
   return (
     <SoftCard>
@@ -727,6 +752,7 @@ function EntryRow({
   rec,
   run,
   busy,
+  save,
 }: {
   e: Entry;
   today: string;
@@ -735,6 +761,7 @@ function EntryRow({
   rec?: Recurrence | undefined;
   busy: boolean;
   run: (fn: () => Promise<void>) => void;
+  save: (fn: () => Promise<void>) => Promise<void>;
 }) {
   const [mode, setMode] = useState<null | "pay" | "edit">(null);
   const [details, setDetails] = useState(false);
@@ -905,7 +932,7 @@ function EntryRow({
         <tr className="border-t">
           <td colSpan={8} className="p-3">
             {mode === "pay" ? (
-              <PayForm e={e} today={today} busy={busy} onDone={() => setMode(null)} run={run} />
+              <PayForm e={e} today={today} busy={busy} onDone={() => setMode(null)} save={save} />
             ) : (
               <EditForm
                 e={e}
@@ -913,7 +940,7 @@ function EntryRow({
                 rec={rec}
                 busy={busy}
                 onDone={() => setMode(null)}
-                run={run}
+                save={save}
               />
             )}
           </td>
@@ -927,28 +954,35 @@ function PayForm({
   e,
   today,
   busy,
-  run,
+  save,
   onDone,
 }: {
   e: Entry;
   today: string;
   busy: boolean;
   onDone: () => void;
-  run: (fn: () => Promise<void>) => void;
+  save: (fn: () => Promise<void>) => Promise<void>;
 }) {
   const [amount, setAmount] = useState(
     String(e.amount_paid > 0 ? e.amount_paid : e.amount_planned).replace(".", ","),
   );
   const [date, setDate] = useState(e.paid_date ?? today);
   const [err, setErr] = useState<string | null>(null);
-  const save = (value: number, d: string | null) =>
-    run(async () => {
-      const { error } = await supabase
-        .from("fin_entries")
-        .update({ amount_paid: value, paid_date: d })
-        .eq("id", e.id);
-      if (error) throw error;
-    });
+  const persist = async (value: number, d: string | null) => {
+    setErr(null);
+    try {
+      await save(async () => {
+        const { error } = await supabase
+          .from("fin_entries")
+          .update({ amount_paid: value, paid_date: d })
+          .eq("id", e.id);
+        if (error) throw error;
+      });
+      onDone();
+    } catch (x) {
+      setErr(friendly(x));
+    }
+  };
   return (
     <div className="mt-3 grid gap-2 rounded-md bg-muted/60 p-3 sm:grid-cols-3">
       <Field label="Valor efetivo total (R$)">
@@ -990,8 +1024,7 @@ function PayForm({
             const v = parseBRL(amount);
             if (v === null || v === 0) return setErr("Informe um valor maior que zero.");
             if (!date) return setErr("Informe a data.");
-            save(v, date);
-            onDone();
+            persist(v, date);
           }}
         >
           Salvar
@@ -1001,10 +1034,7 @@ function PayForm({
             variant="ghost"
             className={btnGhost}
             disabled={busy}
-            onClick={() => {
-              save(0, null);
-              onDone();
-            }}
+            onClick={() => persist(0, null)}
           >
             Desfazer
           </Button>
@@ -1027,7 +1057,7 @@ function EditForm({
   categories,
   rec,
   busy,
-  run,
+  save,
   onDone,
 }: {
   e: Entry;
@@ -1035,7 +1065,7 @@ function EditForm({
   rec?: Recurrence | undefined;
   busy: boolean;
   onDone: () => void;
-  run: (fn: () => Promise<void>) => void;
+  save: (fn: () => Promise<void>) => Promise<void>;
 }) {
   const [nature, setNature] = useState<Nature>(e.nature ?? "nao_classificada");
   const [desc, setDesc] = useState(e.description);
@@ -1046,41 +1076,49 @@ function EditForm({
   const [scope, setScope] = useState<"one" | "future">("one");
   const [err, setErr] = useState<string | null>(null);
   const recurring = !!(e.recurrence_id && rec?.active);
-  const submit = () => {
+  const submit = async () => {
     const v = parseBRL(amount);
     if (!desc.trim()) return setErr("Informe uma descrição.");
     if (v === null) return setErr("Valor inválido.");
     if (!due) return setErr("Informe o vencimento.");
     const category_id = cat || null;
-    run(async () => {
-      const { error } = await supabase
-        .from("fin_entries")
-        .update({
-          nature,
-          description: desc.trim(),
-          amount_planned: v,
-          due_date: due,
-          category_id,
-          notes: notes.trim() || null,
-        })
-        .eq("id", e.id);
-      if (error) throw error;
-      if (recurring && scope === "future" && e.competence && e.recurrence_id) {
-        const { error: e1 } = await supabase
-          .from("fin_recurrences")
-          .update({ nature, description: desc.trim(), amount_planned: v, category_id })
-          .eq("id", e.recurrence_id);
-        if (e1) throw e1;
-        const { error: e2 } = await supabase
+    // valor mudou à mão: o cálculo automático do repasse não pode mais sobrescrever
+    const manual = v !== e.amount_planned ? { amount_manual: true } : {};
+    setErr(null);
+    try {
+      await save(async () => {
+        const { error } = await supabase
           .from("fin_entries")
-          .update({ nature, description: desc.trim(), amount_planned: v, category_id })
-          .eq("recurrence_id", e.recurrence_id)
-          .gt("competence", e.competence)
-          .eq("amount_paid", 0);
-        if (e2) throw e2;
-      }
-    });
-    onDone();
+          .update({
+            nature,
+            description: desc.trim(),
+            amount_planned: v,
+            due_date: due,
+            category_id,
+            notes: notes.trim() || null,
+            ...manual,
+          })
+          .eq("id", e.id);
+        if (error) throw error;
+        if (recurring && scope === "future" && e.competence && e.recurrence_id) {
+          const { error: e1 } = await supabase
+            .from("fin_recurrences")
+            .update({ nature, description: desc.trim(), amount_planned: v, category_id })
+            .eq("id", e.recurrence_id);
+          if (e1) throw e1;
+          const { error: e2 } = await supabase
+            .from("fin_entries")
+            .update({ nature, description: desc.trim(), amount_planned: v, category_id, ...manual })
+            .eq("recurrence_id", e.recurrence_id)
+            .gt("competence", e.competence)
+            .eq("amount_paid", 0);
+          if (e2) throw e2;
+        }
+      });
+      onDone();
+    } catch (x) {
+      setErr(friendly(x));
+    }
   };
   return (
     <div className="mt-3 grid gap-2 rounded-md bg-muted/60 p-3 sm:grid-cols-2">
@@ -1222,13 +1260,16 @@ function Categories({
   categories,
   busy,
   run,
+  save,
 }: {
   categories: Category[];
   busy: boolean;
   run: (fn: () => Promise<void>) => void;
+  save: (fn: () => Promise<void>) => Promise<void>;
 }) {
   const [name, setName] = useState("");
   const [kind, setKind] = useState<Kind>("despesa");
+  const [err, setErr] = useState<string | null>(null);
   return (
     <SoftCard>
       <h3 className="mb-3 font-semibold">Categorias</h3>
@@ -1263,18 +1304,28 @@ function Categories({
           variant="ghost"
           className={btnPrimary}
           disabled={busy || !name.trim()}
-          onClick={() => {
+          onClick={async () => {
             const n = name.trim();
-            setName("");
-            run(async () => {
-              const { error } = await supabase.from("fin_categories").insert({ kind, name: n });
-              if (error) throw error;
-            });
+            setErr(null);
+            try {
+              await save(async () => {
+                const { error } = await supabase.from("fin_categories").insert({ kind, name: n });
+                if (error) throw error;
+              });
+              setName("");
+            } catch (x) {
+              setErr(friendly(x));
+            }
           }}
         >
           Salvar
         </Button>
       </div>
+      {err && (
+        <p role="alert" className="mt-2 text-sm text-destructive">
+          {err}
+        </p>
+      )}
       {(["despesa", "receita"] as Kind[]).map((k) => (
         <div key={k} className="mt-4">
           <h3 className="mb-2 text-sm font-semibold">
@@ -1323,12 +1374,12 @@ function Periodic({
   recs,
   entries,
   busy,
-  run,
+  save,
 }: {
   recs: Recurrence[];
   entries: Entry[];
   busy: boolean;
-  run: (fn: () => Promise<void>) => void;
+  save: (fn: () => Promise<void>) => Promise<void>;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
@@ -1407,15 +1458,15 @@ function Periodic({
                       variant="ghost"
                       className={btnPrimary}
                       disabled={busy}
-                      onClick={() => {
+                      onClick={async () => {
                         const v = parseBRL(amount);
                         if (v === null) return setErr("Valor inválido.");
                         if (!/^\d{4}-\d{2}-\d{2}$/.test(due))
                           return setErr("Informe o vencimento.");
-                        run(async () => {
-                          const { error } = await supabase
-                            .from("fin_entries")
-                            .insert({
+                        setErr(null);
+                        try {
+                          await save(async () => {
+                            const { error } = await supabase.from("fin_entries").insert({
                               kind: r.kind,
                               nature: r.nature ?? "anual",
                               category_id: r.category_id,
@@ -1426,9 +1477,12 @@ function Periodic({
                               competence: monthOf(due),
                               sort_order: r.sort_order ?? 100,
                             });
-                          if (error) throw error;
-                        });
-                        close();
+                            if (error) throw error;
+                          });
+                          close();
+                        } catch (x) {
+                          setErr(friendly(x));
+                        }
                       }}
                     >
                       Salvar

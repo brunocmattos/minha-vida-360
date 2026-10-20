@@ -22,6 +22,7 @@ export const ACCOUNT_NAMES: Record<Account, string> = {
   pluxee: "Pluxee Guarida",
   ifood: "iFood Benefícios Riachuelo",
 };
+const round2 = (n: number) => Math.round(n * 100) / 100;
 export function accountMovement(
   entries: Entry[],
   transfers: Transfer[],
@@ -44,10 +45,10 @@ export function accountMovement(
     if (t.from_wallet === account) transferred -= t.amount;
   }
   return {
-    incoming,
-    outgoing,
-    transferred,
-    net: Math.round((incoming - outgoing + transferred) * 100) / 100,
+    incoming: round2(incoming),
+    outgoing: round2(outgoing),
+    transferred: round2(transferred),
+    net: round2(incoming - outgoing + transferred),
   };
 }
 export function accountBalance(
@@ -63,15 +64,15 @@ export function accountBalance(
   const movement = accountMovement(entries, transfers, account, month);
   if (!prior)
     return { opening: null, closing: null, movement, included: true, manual: false, label: null };
-  let opening = prior.amount;
-  let closing = prior.included ? prior.amount : 0;
+  let opening = round2(prior.amount);
+  let closing = prior.included ? opening : 0;
   for (let m = prior.competence; m <= month; m = addMonths(m, 1)) {
-    opening = m === prior.competence ? prior.amount : closing;
-    closing += accountMovement(entries, transfers, account, m).net;
+    opening = m === prior.competence ? round2(prior.amount) : closing;
+    closing = round2(closing + accountMovement(entries, transfers, account, m).net);
   }
   return {
     opening,
-    closing: Math.round(closing * 100) / 100,
+    closing,
     movement,
     included: prior.competence === month ? prior.included : true,
     manual: prior.competence === month,

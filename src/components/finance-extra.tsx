@@ -77,16 +77,11 @@ export function Payslips() {
         Detalhamento de referência. Os consignados já estão descontados do líquido: nunca são
         despesas de caixa adicionais.
       </p>
-      {save.error && (
-        <p role="alert" className="text-sm text-destructive">
-          Não foi possível salvar. Verifique se já existe contracheque dessa competência.
-        </p>
-      )}
       {!q.data?.length ? (
         <EmptyNote>Nenhum contracheque cadastrado.</EmptyNote>
       ) : (
         q.data.map((s) => (
-          <SlipCard key={s.id} s={s} busy={save.isPending} onSave={(x) => save.mutate(x)} />
+          <SlipCard key={s.id} s={s} busy={save.isPending} onSave={(x) => save.mutateAsync(x)} />
         ))
       )}
     </div>
@@ -100,7 +95,7 @@ function SlipCard({
 }: {
   s: Slip;
   busy: boolean;
-  onSave: (s: Slip & { isNew?: boolean }) => void;
+  onSave: (s: Slip & { isNew?: boolean }) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState<null | "edit" | "copy">(null);
@@ -192,8 +187,8 @@ function SlipCard({
           copy={edit === "copy"}
           busy={busy}
           onCancel={() => setEdit(null)}
-          onSave={(x) => {
-            onSave(x);
+          onSave={async (x) => {
+            await onSave(x);
             setEdit(null);
           }}
         />
@@ -213,7 +208,7 @@ function SlipForm({
   copy: boolean;
   busy: boolean;
   onCancel: () => void;
-  onSave: (s: Slip & { isNew?: boolean }) => void;
+  onSave: (s: Slip & { isNew?: boolean }) => Promise<void>;
 }) {
   const init = {
     comp: copy ? "" : s.competence.slice(0, 7),
@@ -225,20 +220,25 @@ function SlipForm({
   const [d, setD] = useState(init.d);
   const [err, setErr] = useState<string | null>(null);
   const dirty = comp !== init.comp || e.join() !== init.e.join() || d.join() !== init.d.join();
-  const submit = () => {
+  const submit = async () => {
     if (!/^\d{4}-\d{2}$/.test(comp)) return setErr("Informe a competência.");
     const pe = e.map(parseBRL),
       pd = d.map(parseBRL);
     if (pe.includes(null) || pd.includes(null)) return setErr("Algum valor está inválido.");
-    onSave({
-      ...s,
-      isNew: copy,
-      competence: `${comp}-01`,
-      paid_month: copy ? null : s.paid_month,
-      earnings: s.earnings.map((l, i) => ({ ...l, amount: pe[i]! })),
-      deductions: s.deductions.map((l, i) => ({ ...l, amount: pd[i]! })),
-      notes: copy ? null : s.notes,
-    });
+    setErr(null);
+    try {
+      await onSave({
+        ...s,
+        isNew: copy,
+        competence: `${comp}-01`,
+        paid_month: copy ? null : s.paid_month,
+        earnings: s.earnings.map((l, i) => ({ ...l, amount: pe[i]! })),
+        deductions: s.deductions.map((l, i) => ({ ...l, amount: pd[i]! })),
+        notes: copy ? null : s.notes,
+      });
+    } catch {
+      setErr("Não foi possível salvar. Verifique se já existe contracheque dessa competência.");
+    }
   };
   const row = (l: Line, v: string, set: (v: string) => void) => (
     <label key={l.label} className="flex items-center justify-between gap-2 text-sm">
@@ -344,11 +344,6 @@ export function CreditRecords() {
         Separado da carteira e do fluxo mensal. Não conta como conta a pagar nem na projeção
         enquanto não houver acordo ativo. Valores informados por você.
       </p>
-      {save.error && (
-        <p role="alert" className="text-sm text-destructive">
-          Não foi possível salvar.
-        </p>
-      )}
       {!rows.length ? (
         <EmptyNote>Nenhum registro.</EmptyNote>
       ) : (
@@ -370,8 +365,8 @@ export function CreditRecords() {
                     r={r}
                     busy={save.isPending}
                     onCancel={() => setEditing(null)}
-                    onSave={(v) => {
-                      save.mutate({ id: r.id, ...v });
+                    onSave={async (v) => {
+                      await save.mutateAsync({ id: r.id, ...v });
                       setEditing(null);
                     }}
                   />
@@ -419,11 +414,11 @@ function CreditEdit({
   r: Rec;
   busy: boolean;
   onCancel: () => void;
-  onSave: (v: { amount: number; notes: string | null }) => void;
+  onSave: (v: { amount: number; notes: string | null }) => Promise<void>;
 }) {
   const [amount, setAmount] = useState(money(r.amount));
   const [notes, setNotes] = useState(r.notes ?? "");
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   return (
     <tr className="border-t">
       <td className="py-2 font-medium">{r.creditor}</td>
@@ -437,7 +432,7 @@ function CreditEdit({
         />
         {err && (
           <span role="alert" className="block text-xs text-destructive">
-            Valor inválido
+            {err}
           </span>
         )}
       </td>
@@ -465,10 +460,15 @@ function CreditEdit({
           <Button
             size="sm"
             disabled={busy}
-            onClick={() => {
+            onClick={async () => {
               const v = parseBRL(amount);
-              if (v === null) return setErr(true);
-              onSave({ amount: v, notes: notes.trim() || null });
+              if (v === null) return setErr("Valor inválido");
+              setErr(null);
+              try {
+                await onSave({ amount: v, notes: notes.trim() || null });
+              } catch {
+                setErr("Não foi possível salvar.");
+              }
             }}
           >
             Salvar

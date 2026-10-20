@@ -37,6 +37,7 @@ export type Entry = {
   day_known?: boolean;
   installment_no?: number | null;
   installment_total?: number | null;
+  amount_manual?: boolean;
 };
 export type Recurrence = {
   benefit_account?: "pluxee" | "ifood" | null;
@@ -71,6 +72,7 @@ export function statusLabel(st: Status, kind: Kind): string {
   if (st === "pago") return kind === "receita" ? "Recebido" : "Pago";
   return STATUS_LABEL[st];
 }
+const cents = (n: number) => Math.round(n * 100);
 const monthsBetween = (a: string, b: string) =>
   (Number(b.slice(0, 4)) - Number(a.slice(0, 4))) * 12 +
   Number(b.slice(5, 7)) -
@@ -98,14 +100,15 @@ export function halfHousing(entries: Entry[], recs: Recurrence[], competence: st
   );
   const sum = entries
     .filter((e) => e.recurrence_id && ids.has(e.recurrence_id) && e.competence === competence)
-    .reduce((n, e) => n + e.amount_planned, 0);
-  return Math.round(sum * 50) / 100;
+    .reduce((n, e) => n + cents(e.amount_planned), 0);
+  return Math.round(sum / 2) / 100;
 }
 
-/** Recalcula apenas previsões dentro da vigência; recebimentos e datas confirmadas são preservados. */
+/** Recalcula apenas previsões dentro da vigência; recebimentos, datas confirmadas e valores editados à mão são preservados. */
 export function halfHousingUpdates(entries: Entry[], recs: Recurrence[]) {
   return entries.flatMap((e) => {
     if (e.kind !== "receita" || e.amount_paid !== 0 || e.paid_date || !e.competence) return [];
+    if (e.amount_manual) return [];
     const r = recs.find((r) => r.id === e.recurrence_id && r.formula === "half_housing");
     if (!r || e.competence < r.start_month || (r.end_month && e.competence > r.end_month))
       return [];
@@ -148,11 +151,14 @@ export function monthLabel(month: string): string {
 }
 
 export function entryStatus(
-  e: Pick<Entry, "amount_planned" | "amount_paid" | "due_date">,
+  e: Pick<Entry, "amount_planned" | "amount_paid" | "due_date" | "day_known">,
   today: string,
 ): Status {
   if (e.amount_paid > 0 && e.amount_paid >= e.amount_planned) return "pago";
-  if (e.due_date < today) return "vencido";
+  // dia a definir: o dia gravado é só um marcador, então só vence depois que o mês acaba
+  const late =
+    e.day_known === false ? e.due_date.slice(0, 7) < today.slice(0, 7) : e.due_date < today;
+  if (late) return "vencido";
   if (e.amount_paid > 0) return "parcial";
   return "pendente";
 }
@@ -198,29 +204,35 @@ export type MonthSummary = {
 };
 /** Previsto = por vencimento no mês. Efetivo (caixa) = somente valores pagos/recebidos com data no mês. */
 export function summarizeMonth(entries: Entry[], month: string): MonthSummary {
-  const s = {
+  // soma em centavos inteiros para não acumular erro de ponto flutuante
+  const c = {
     plannedIn: 0,
     plannedOut: 0,
     realizedIn: 0,
     realizedOut: 0,
-    cash: 0,
     benefitPlanned: 0,
     benefitReceived: 0,
   };
   for (const e of entries) {
+    const dueNow = monthOf(e.due_date) === month;
+    const paidNow = !!e.paid_date && e.amount_paid > 0 && monthOf(e.paid_date) === month;
     if (e.wallet === "beneficio") {
-      if (monthOf(e.due_date) === month) s.benefitPlanned += e.amount_planned;
-      if (e.paid_date && e.amount_paid > 0 && monthOf(e.paid_date) === month)
-        s.benefitReceived += e.amount_paid;
+      if (dueNow) c.benefitPlanned += cents(e.amount_planned);
+      if (paidNow) c.benefitReceived += cents(e.amount_paid);
       continue;
     }
-    if (monthOf(e.due_date) === month)
-      e.kind === "receita" ? (s.plannedIn += e.amount_planned) : (s.plannedOut += e.amount_planned);
-    if (e.paid_date && e.amount_paid > 0 && monthOf(e.paid_date) === month)
-      e.kind === "receita" ? (s.realizedIn += e.amount_paid) : (s.realizedOut += e.amount_paid);
+    if (dueNow) c[e.kind === "receita" ? "plannedIn" : "plannedOut"] += cents(e.amount_planned);
+    if (paidNow) c[e.kind === "receita" ? "realizedIn" : "realizedOut"] += cents(e.amount_paid);
   }
-  s.cash = Math.round((s.realizedIn - s.realizedOut) * 100) / 100;
-  return s;
+  return {
+    plannedIn: c.plannedIn / 100,
+    plannedOut: c.plannedOut / 100,
+    realizedIn: c.realizedIn / 100,
+    realizedOut: c.realizedOut / 100,
+    cash: (c.realizedIn - c.realizedOut) / 100,
+    benefitPlanned: c.benefitPlanned / 100,
+    benefitReceived: c.benefitReceived / 100,
+  };
 }
 
 export function projection(entries: Entry[], fromMonth: string, months = 12) {

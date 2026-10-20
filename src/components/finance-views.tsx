@@ -1,5 +1,5 @@
 import { Fragment, useState, type ReactNode } from "react";
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, ChevronDown, Wallet } from "lucide-react";
+import { CalendarDays, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { formatDue } from "@/lib/recurrence";
@@ -11,67 +11,10 @@ import {
   NATURE_LABEL,
   STATUS_LABEL,
   sortEntries,
-  summarizeMonth,
   type Entry,
   type Recurrence,
   type Status,
 } from "@/lib/finance";
-
-export function MonthWallet({ entries, month }: { entries: Entry[]; month: string }) {
-  const s = summarizeMonth(entries, month);
-  return (
-    <section
-      aria-label="Carteira do mês"
-      className="wallet-panel rounded-lg border bg-card p-5 md:p-6"
-    >
-      <h2 className="mb-5 flex items-center gap-2 text-base font-semibold">
-        <Wallet className="size-4 text-primary" />
-        Carteira do mês
-      </h2>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <p className="text-sm text-muted-foreground">Movimentação líquida confirmada no mês</p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums">{formatBRL(s.cash)}</p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Sem saldo inicial cadastrado. Não representa seu saldo bancário.
-          </p>
-        </div>
-        <div className="border-t pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
-          <p className="text-sm text-muted-foreground">Resultado projetado no mês</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-primary">
-            {formatBRL(Math.round((s.plannedIn - s.plannedOut) * 100) / 100)}
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Receitas previstas menos despesas previstas por vencimento.
-          </p>
-        </div>
-      </div>
-      <div className="mt-6 grid grid-cols-2 gap-4 border-t pt-4 text-sm lg:grid-cols-4">
-        <WalletStat label="Receitas recebidas" value={s.realizedIn} income />
-        <WalletStat label="Despesas pagas" value={s.realizedOut} />
-        <WalletStat label="Receitas previstas" value={s.plannedIn} income />
-        <WalletStat label="Despesas previstas" value={s.plannedOut} />
-      </div>
-      <p className="mt-4 border-t pt-4 text-xs text-muted-foreground">
-        Benefício Pluxee (carteira separada, fora do caixa bancário): previsto{" "}
-        {formatBRL(s.benefitPlanned)} · recebido {formatBRL(s.benefitReceived)}. Consignados já
-        estão descontados do líquido; SPC/Serasa não entra aqui.
-      </p>
-    </section>
-  );
-}
-function WalletStat({ label, value, income }: { label: string; value: number; income?: boolean }) {
-  const Icon = income ? ArrowDownLeft : ArrowUpRight;
-  return (
-    <div>
-      <p className="flex items-center gap-1 text-xs text-muted-foreground">
-        <Icon className="size-3 shrink-0" />
-        {label}
-      </p>
-      <p className="mt-1 font-semibold tabular-nums">{formatBRL(value)}</p>
-    </div>
-  );
-}
 
 export function EntryBrowser({
   entries,

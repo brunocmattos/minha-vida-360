@@ -100,6 +100,7 @@ export type Database = {
       };
       fin_entries: {
         Row: {
+          amount_manual: boolean;
           amount_paid: number;
           amount_planned: number;
           benefit_account: string | null;
@@ -124,6 +125,7 @@ export type Database = {
           wallet: string;
         };
         Insert: {
+          amount_manual?: boolean;
           amount_paid?: number;
           amount_planned: number;
           benefit_account?: string | null;
@@ -148,6 +150,7 @@ export type Database = {
           wallet?: string;
         };
         Update: {
+          amount_manual?: boolean;
           amount_paid?: number;
           amount_planned?: number;
           benefit_account?: string | null;

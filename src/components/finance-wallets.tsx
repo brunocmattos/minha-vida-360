@@ -13,6 +13,7 @@ import {
   type Transfer,
 } from "@/lib/finance-balances";
 import { formatBRL, parseBRL, summarizeMonth, type Entry } from "@/lib/finance";
+import { fetchAllRows } from "@/lib/fetch-all";
 import { todaySP, formatDue } from "@/lib/recurrence";
 
 const cls = "w-full rounded-md border bg-background px-3 py-2 text-sm";
@@ -20,16 +21,32 @@ export function useWalletData() {
   return useQuery({
     queryKey: ["fin-wallets"],
     queryFn: async () => {
+      // paginado: o Supabase corta em 1000 linhas; o desempate por id evita páginas cruzadas
       const [o, t, h] = await Promise.all([
-        supabase.from("fin_openings").select("*"),
-        supabase.from("fin_transfers").select("*"),
-        supabase.from("fin_opening_history").select("*").order("changed_at", { ascending: false }),
+        fetchAllRows((from, to) =>
+          supabase.from("fin_openings").select("*").order("competence").order("id").range(from, to),
+        ),
+        fetchAllRows((from, to) =>
+          supabase
+            .from("fin_transfers")
+            .select("*")
+            .order("transfer_date")
+            .order("id")
+            .range(from, to),
+        ),
+        fetchAllRows((from, to) =>
+          supabase
+            .from("fin_opening_history")
+            .select("*")
+            .order("changed_at", { ascending: false })
+            .order("id")
+            .range(from, to),
+        ),
       ]);
-      if (o.error || t.error || h.error) throw o.error || t.error || h.error;
       return {
-        openings: (o.data ?? []).map((x) => ({ ...x, amount: Number(x.amount) })) as Opening[],
-        transfers: (t.data ?? []).map((x) => ({ ...x, amount: Number(x.amount) })) as Transfer[],
-        history: h.data ?? [],
+        openings: o.map((x) => ({ ...x, amount: Number(x.amount) })) as Opening[],
+        transfers: t.map((x) => ({ ...x, amount: Number(x.amount) })) as Transfer[],
+        history: h,
       };
     },
   });
@@ -378,18 +395,16 @@ export function WalletDashboard({ entries, month }: { entries: Entry[]; month: s
                   const existing = d.openings.find(
                     (o) => o.wallet === wallet && o.competence === month,
                   );
-                  const r = await supabase
-                    .from("fin_openings")
-                    .upsert(
-                      {
-                        wallet,
-                        competence: month,
-                        amount: parsed,
-                        included,
-                        label: existing?.label ?? null,
-                      },
-                      { onConflict: "owner_id,wallet,competence" },
-                    );
+                  const r = await supabase.from("fin_openings").upsert(
+                    {
+                      wallet,
+                      competence: month,
+                      amount: parsed,
+                      included,
+                      label: existing?.label ?? null,
+                    },
+                    { onConflict: "owner_id,wallet,competence" },
+                  );
                   if (r.error) throw r.error;
                 });
               }}
@@ -469,14 +484,12 @@ export function WalletDashboard({ entries, month }: { entries: Entry[]; month: s
                 if (n === null || n <= 0 || !date)
                   return setError("Informe valor positivo e data.");
                 run.mutate(async () => {
-                  const r = await supabase
-                    .from("fin_transfers")
-                    .insert({
-                      from_wallet: from,
-                      to_wallet: from === "banco" ? "poupanca" : "banco",
-                      amount: n,
-                      transfer_date: date,
-                    });
+                  const r = await supabase.from("fin_transfers").insert({
+                    from_wallet: from,
+                    to_wallet: from === "banco" ? "poupanca" : "banco",
+                    amount: n,
+                    transfer_date: date,
+                  });
                   if (r.error) throw r.error;
                 });
               }}
@@ -518,8 +531,9 @@ export function SavingsGoals() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["fin-goals"] });
       setEdit(null);
+      setError("");
     },
-    onError: () => setError("Não foi possível salvar a meta."),
+    onError: () => setError("Não foi possível concluir a ação na meta. Tente novamente."),
   });
   const open = (g: Goal) => {
     setEdit(g);
@@ -566,6 +580,11 @@ export function SavingsGoals() {
       {q.error && (
         <p role="alert" className="text-destructive">
           Não foi possível carregar metas.
+        </p>
+      )}
+      {error && !edit && (
+        <p role="alert" className="text-destructive">
+          {error}
         </p>
       )}
       {!q.isLoading && !q.data?.length && (
