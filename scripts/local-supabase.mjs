@@ -1,14 +1,17 @@
 // Dev contra o Supabase LOCAL (npx supabase start), sem tocar no .env real.
 // Uso: node scripts/local-supabase.mjs seed  -> cria o usuário de teste (idempotente)
 //      node scripts/local-supabase.mjs dev   -> sobe o vite apontando pro banco local
-// As chaves abaixo são as padrões de demonstração do Supabase CLI (iguais em qualquer máquina).
-import { spawn } from "node:child_process";
+// As chaves vêm do próprio Supabase local (supabase status), nada fica escrito no código.
+import { execSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
-const API_URL = "http://127.0.0.1:54321";
-const PUBLISHABLE_KEY = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-const SECRET_KEY = "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
+const cwd = fileURLToPath(new URL("..", import.meta.url));
+const status = JSON.parse(
+  execSync("npx -y supabase@2.121.0 status -o json", { cwd, encoding: "utf8" }),
+);
+const { API_URL, PUBLISHABLE_KEY, SECRET_KEY } = status;
+if (!API_URL?.includes("127.0.0.1")) throw new Error("Supabase local não está rodando.");
 
 // Login do app: nome "teste" vira teste@minhavida360.app (ver usernameToEmail em src/routes/auth.tsx)
 export const TEST_USER = {
@@ -37,7 +40,6 @@ if (cmd === "seed") {
     SUPABASE_URL: API_URL,
     SUPABASE_PUBLISHABLE_KEY: PUBLISHABLE_KEY,
   };
-  const cwd = fileURLToPath(new URL("..", import.meta.url));
   spawn("npx", ["vite", "dev"], { cwd, env, stdio: "inherit", shell: true }).on("exit", (c) =>
     process.exit(c ?? 0),
   );
