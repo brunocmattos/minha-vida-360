@@ -3,6 +3,13 @@
 .env.*
 !.env.example
 
+# Supabase CLI local (npx supabase start)
+supabase/.branches
+supabase/.temp
+
+# Playwright MCP
+.playwright-mcp
+
 # Logs
 logs
 *.log
