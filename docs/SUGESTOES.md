@@ -17,7 +17,8 @@ está instalado. Assim dá pra trocar de provedor na Vercel, sem mexer em códig
 qualidade mudarem.
 
 **O que muda para o DeepSeek funcionar** (verificado na documentação deles em 2026-10-20):
-- Hoje o código usa a *Responses API* da OpenAI com esquema JSON estrito e opções de "reasoning".
+
+- Hoje o código usa a _Responses API_ da OpenAI com esquema JSON estrito e opções de "reasoning".
   O DeepSeek fala o formato **chat completions** (compatível com OpenAI, `https://api.deepseek.com`)
   e só tem **modo JSON** (`json_object`), sem esquema estrito.
 - Então: usar `provider.chat(...)` em vez de `provider.responses(...)`, tirar as opções de reasoning,
@@ -37,6 +38,7 @@ configurável a troca é só de variável.
 (ACHADOS B4), e corrigir o histórico que pega as mensagens mais antigas.
 
 **Próximos poderes da Luísa** (mesmo padrão "propõe → confirma"):
+
 - Relatórios só de leitura: "quanto gastei com os filhos esse mês?", "o que vence essa semana?".
 - Criar tarefa no Meu Dia, registrar cuidado de pet, lançar receita.
 
@@ -47,16 +49,17 @@ configurável a troca é só de variável.
 Hoje mudar uma cor é fácil (`src/styles.css`), mas mudar um nome ou uma foto exige caçar em vários
 arquivos (ACHADOS C2). A proposta é **um lugar para cada tipo de coisa**:
 
-| O quê | Onde ficaria | Como ela pede ao Claude Code |
-|---|---|---|
-| Cores, fontes, tema de cada cômodo | `src/config/theme.css` | "deixa o quarto mais rosa" |
-| Textos, nome do app, áreas, lugares, pets, benefícios | `src/config/content.ts` | "troca o nome do Paco na tela" |
-| Fotos e ilustrações | `public/images/` (mesmo nome = troca a foto) | manda a foto e pede "usa essa no jardim" |
+| O quê                                                 | Onde ficaria                                 | Como ela pede ao Claude Code             |
+| ----------------------------------------------------- | -------------------------------------------- | ---------------------------------------- |
+| Cores, fontes, tema de cada cômodo                    | `src/config/theme.css`                       | "deixa o quarto mais rosa"               |
+| Textos, nome do app, áreas, lugares, pets, benefícios | `src/config/content.ts`                      | "troca o nome do Paco na tela"           |
+| Fotos e ilustrações                                   | `public/images/` (mesmo nome = troca a foto) | manda a foto e pede "usa essa no jardim" |
 
 E o `CLAUDE.md` já instrui o Claude Code a explicar em português simples, trabalhar em branch,
 rodar os testes e **nunca** mexer em dados ou banco sem confirmar com ela.
 
 **Fluxo de mudança pelo celular:**
+
 1. Ela abre o Claude Code no celular (claude.ai/code ou app), no repositório do GitHub.
 2. Pede a mudança em português. O Claude Code cria um branch e faz a mudança.
 3. A Vercel gera sozinha um **link de prévia** daquele branch → ela abre no celular e confere.
@@ -74,6 +77,7 @@ bonequinha dela anda até lá e abre as pendências daquela área. **O projeto a
 das peças.**
 
 **O que já existe e serve:**
+
 - A casa (`house-casa.tsx`) já é um desenho SVG com áreas tocáveis, acessível por teclado e com uma
   lista de links por baixo como alternativa.
 - Cada lugar do mapa já tem uma área equivalente em `src/lib/areas.ts`: hospital → `saude`,
@@ -86,6 +90,7 @@ das peças.**
 "em construção" e, por enquanto, as pendências delas seriam só as tarefas.
 
 **Arquitetura sugerida:**
+
 1. **Lugares como dados**: um arquivo `places` com `{ id, nome, x, y, área, imagem }` (posição em %
    do mapa). O mapa e a lista acessível nascem do mesmo arquivo — adicionar um lugar é adicionar uma linha.
 2. **SVG, não canvas**: uma imagem de fundo + pontos tocáveis, igual a casa faz hoje. Com menos de

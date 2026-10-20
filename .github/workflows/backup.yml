@@ -1,0 +1,42 @@
+# Backup do banco a cada 3 dias (e manual pelo botão "Run workflow").
+# Também conta como uso, o que evita o Supabase gratuito pausar o projeto por inatividade.
+# Precisa do segredo DATABASE_URL no repositório (Settings > Secrets and variables > Actions):
+# a connection string "Session pooler" do Supabase.
+# O arquivo fica em Actions > (execução) > Artifacts por 30 dias. Repositório deve ser PRIVADO.
+name: backup
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Instalar pg_dump 17 (mesma versão do Supabase)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+
+      # Só o schema public (dados + RLS). Não usar --table junto: ele anula o --schema.
+      # Para restaurar num banco novo com outra usuária, use scripts/import-data.mjs.
+      - name: Dump dos dados
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          test -n "$DATABASE_URL" || { echo "Falta o segredo DATABASE_URL"; exit 1; }
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
+            --schema=public --no-owner --no-privileges \
+            --format=custom --file="minha-vida-360-$(date +%F).dump"
+          ls -lh *.dump
+          /usr/lib/postgresql/17/bin/pg_restore -l *.dump | grep -c "TABLE DATA public" | xargs -I{} sh -c 'test {} -ge 17 || { echo "Backup incompleto: {} tabelas"; exit 1; }'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ github.run_id }}
+          path: "*.dump"
+          retention-days: 30
