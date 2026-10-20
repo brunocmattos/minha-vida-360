@@ -40,12 +40,13 @@ O import troca o dono dos dados pela usuária nova, mantém as datas originais e
 no fim ("Importação conferida: contagens batem."). Se algo falhar, nada é gravado; se rodar duas
 vezes, ele recusa.
 
-## 4. GitHub (2 min)
+## 4. GitHub (1 min)
 
-Repositório **privado** com este código (o Claude Code pode criar e enviar por você).
-Depois: **Settings → Secrets and variables → Actions → New repository secret** →
-nome `DATABASE_URL`, valor = a connection string do passo 2. Isso liga o **backup automático a
-cada 3 dias** (aba Actions → backup; dá para rodar na hora com **Run workflow**).
+O repositório já existe e está atualizado: **[brunooutcore/minha-vida-360](https://github.com/brunooutcore/minha-vida-360)** (privado).
+Falta só ligar o backup: **Settings → Secrets and variables → Actions → New repository secret** →
+nome , valor = a connection string do passo 2. A partir daí roda sozinho **a cada 3 dias**
+(aba Actions → backup; dá para rodar na hora com **Run workflow**). Até cadastrar o segredo, a rotina
+aparece como falha — é o aviso de que ainda não há backup.
 
 ## 5. Vercel (5 min)
 

@@ -6,8 +6,8 @@ no_ar: não
 atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
 ultima_atividade: 2026-10-20
-proxima_acao: "Bruno: seguir docs/SETUP.md (export dos dados, Supabase, GitHub, Vercel)"
-repo: git-local
+proxima_acao: "Bruno: docs/SETUP.md passos 1-3 e 5 (export, Supabase, import, Vercel)"
+repo: github
 tags: [pessoal, lovable-export, vercel, supabase]
 ---
 
@@ -83,6 +83,7 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 
 ## Ambiente & acessos
 
+- Repositório: https://github.com/brunooutcore/minha-vida-360 (privado, branch `main`).
 - Variáveis do app (Vercel / `.env`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
   `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; Luísa: `LLM_API_KEY` (+ opcionais `LLM_BASE_URL`,
   padrão `https://api.deepseek.com`, e `LLM_MODEL`, padrão `deepseek-flash`).
