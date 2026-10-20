@@ -483,3 +483,12 @@ progress.accent-expense::-moz-progress-bar {
   --primary: oklch(0.5 0.13 150);
   --primary-foreground: oklch(0.99 0 0);
 }
+
+/* iOS dá zoom ao focar campo com fonte < 16px; fora de @layer para vencer as classes text-sm. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

@@ -62,9 +62,7 @@ function MeuDia() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <SectionCard icon={Star} title="Prioridades com carinho" tone="bg-rose">
-          <EmptyNote>
-            Nenhuma prioridade cadastrada ainda. As tarefas chegam na próxima etapa.
-          </EmptyNote>
+          <EmptyNote>Nenhuma prioridade cadastrada ainda.</EmptyNote>
         </SectionCard>
         <SectionCard icon={CheckCircle2} title="Checklist do dia" tone="bg-sage">
           <TaskChecklist />

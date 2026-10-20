@@ -67,7 +67,11 @@ function AuthPage() {
           </p>
         </div>
         <form onSubmit={submit} className="space-y-3">
+          <label htmlFor="auth-username" className="sr-only">
+            Nome
+          </label>
           <input
+            id="auth-username"
             className={inputCls}
             required
             autoCapitalize="none"
@@ -76,7 +80,11 @@ function AuthPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
+          <label htmlFor="auth-password" className="sr-only">
+            Senha
+          </label>
           <input
+            id="auth-password"
             className={inputCls}
             type="password"
             required
@@ -92,7 +100,11 @@ function AuthPage() {
             {busy ? "Aguarde..." : "Entrar"}
           </Button>
         </form>
-        {error && <p className="mt-4 text-center text-sm text-destructive">{error}</p>}
+        {error && (
+          <p role="alert" className="mt-4 text-center text-sm text-destructive">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

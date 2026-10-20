@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetch-all";
 import { SoftCard } from "@/components/cards";
 import { Button } from "@/components/ui/button";
 import { openLuisaChat } from "@/components/luisa-chat";
@@ -21,32 +23,33 @@ const fmtDate = (iso: string) =>
     year: "numeric",
   }).format(new Date(`${iso}T12:00:00Z`));
 
+// A chave é compartilhada: a Luísa invalida ["diary"] depois de anotar um registro.
+const KEY = ["diary"];
+
 export function DiaryModule() {
-  const [entries, setEntries] = useState<DiaryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const [actionError, setActionError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [content, setContent] = useState("");
   const [date, setDate] = useState(() =>
     new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()),
   );
-  const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    const { data, error: err } = await supabase
-      .from("diary_entries")
-      .select("id, entry_date, area_slug, content, created_at")
-      .order("entry_date", { ascending: false })
-      .order("created_at", { ascending: false });
-    if (err) setError("Não consegui carregar seus registros.");
-    setEntries(data ?? []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const q = useQuery({
+    queryKey: KEY,
+    queryFn: () =>
+      fetchAllRows<DiaryEntry>((from, to) =>
+        supabase
+          .from("diary_entries")
+          .select("id, entry_date, area_slug, content, created_at")
+          .order("entry_date", { ascending: false })
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ),
+  });
+  // Em erro de recarga o react-query mantém o último dado bom.
+  const entries = q.data ?? [];
 
   function cancel() {
     if (content.trim() && !window.confirm("Descartar o registro não salvo?")) return;
@@ -54,31 +57,39 @@ export function DiaryModule() {
     setContent("");
   }
 
-  async function save() {
-    if (!content.trim() || saving) return;
-    setSaving(true);
-    setError(null);
-    const { error: err } = await supabase
-      .from("diary_entries")
-      .insert({ content: content.trim(), entry_date: date });
-    setSaving(false);
-    if (err) {
-      setError("Não consegui salvar o registro.");
-      return;
-    }
-    setFormOpen(false);
-    setContent("");
-    await load();
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("diary_entries")
+        .insert({ content: content.trim(), entry_date: date });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      setFormOpen(false);
+      setContent("");
+      await qc.invalidateQueries({ queryKey: KEY });
+    },
+    onError: () => setActionError("Não consegui salvar o registro."),
+  });
+  const del = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("diary_entries").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+    onError: () => setActionError("Não consegui excluir o registro."),
+  });
+
+  function submit() {
+    if (!content.trim() || save.isPending) return;
+    setActionError(null);
+    save.mutate();
   }
 
-  async function remove(id: string) {
+  function remove(id: string) {
     if (!window.confirm("Excluir este registro do diário?")) return;
-    const { error: err } = await supabase.from("diary_entries").delete().eq("id", id);
-    if (err) {
-      setError("Não consegui excluir o registro.");
-      return;
-    }
-    await load();
+    setActionError(null);
+    del.mutate(id);
   }
 
   return (
@@ -127,8 +138,8 @@ export function DiaryModule() {
             </Button>
             <Button
               className="rounded-full"
-              disabled={saving || !content.trim()}
-              onClick={() => void save()}
+              disabled={save.isPending || !content.trim()}
+              onClick={submit}
             >
               Salvar
             </Button>
@@ -136,16 +147,32 @@ export function DiaryModule() {
         </SoftCard>
       )}
 
-      {error && (
-        <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+      {actionError && (
+        <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {actionError}
+        </p>
       )}
-      {loading ? (
+      {q.isError && (
+        <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          Não consegui carregar seus registros.{" "}
+          <button
+            type="button"
+            className="font-semibold underline"
+            onClick={() => void q.refetch()}
+          >
+            Tentar de novo
+          </button>
+        </p>
+      )}
+      {q.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : entries.length === 0 ? (
-        <SoftCard className="text-sm text-muted-foreground">
-          Nenhum registro ainda. Quando você escrever — aqui ou pela Luísa — ele aparece nesta
-          lista.
-        </SoftCard>
+        !q.isError && (
+          <SoftCard className="text-sm text-muted-foreground">
+            Nenhum registro ainda. Quando você escrever — aqui ou pela Luísa — ele aparece nesta
+            lista.
+          </SoftCard>
+        )
       ) : (
         <ul className="space-y-3">
           {entries.map((e) => (
@@ -161,7 +188,7 @@ export function DiaryModule() {
                   variant="ghost"
                   size="icon"
                   aria-label="Excluir registro"
-                  onClick={() => void remove(e.id)}
+                  onClick={() => remove(e.id)}
                 >
                   <Trash2 className="size-4" />
                 </Button>

@@ -30,7 +30,7 @@ const SIZE: Record<string, string> = { dobby: "Pequeno", paco: "Pequeno", zara: 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { SoftCard, EmptyNote } from "@/components/cards";
-import { confirmDiscard } from "@/components/back-button";
+import { confirmDelete, confirmDiscard } from "@/components/back-button";
 import { formatBRL } from "@/lib/finance";
 import { careStatus, careScheduleDate } from "@/lib/pet-care";
 import dobbyIllustration from "@/assets/pets/dobby.png";
@@ -47,7 +47,7 @@ const fmtDate = (d: string | null) =>
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
-      }).format(new Date(`${d}T12:00:00`))
+      }).format(new Date(`${d}T12:00:00Z`))
     : "A definir";
 const todayISO = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
 
@@ -104,11 +104,25 @@ const illustrations: Record<string, string> = {
   paco: pacoIllustration,
   zara: zaraIllustration,
 };
-function Mascot({ slug }: { slug: string }) {
+// Pet sem ilustração/retrato conhecido (ex.: um 4º pet) mostra a inicial do nome.
+function Initial({ name, className }: { name: string; className: string }) {
+  return (
+    <span
+      role="img"
+      aria-label={`Sem foto de ${name}`}
+      className={`grid shrink-0 place-items-center rounded-full bg-[var(--garden-paw-bg)] font-display font-bold text-[var(--garden-paw)] ${className}`}
+    >
+      {name.trim().charAt(0).toUpperCase() || "?"}
+    </span>
+  );
+}
+function Mascot({ slug, name }: { slug: string; name: string }) {
+  const src = illustrations[slug];
+  if (!src) return <Initial name={name} className="size-20 text-3xl" />;
   return (
     <img
-      src={illustrations[slug]}
-      alt={`Ilustração de ${slug}`}
+      src={src}
+      alt={`Ilustração de ${name}`}
       width={80}
       height={80}
       className="pet-mascot size-20 shrink-0 object-contain"
@@ -173,6 +187,7 @@ export function PetsModule() {
       const { data, error } = await supabase
         .from("fin_recurrences")
         .select("description, amount_planned, frequency, active")
+        .eq("active", true)
         .ilike("description", "%filhos%");
       if (error) throw error;
       return data ?? [];
@@ -212,13 +227,22 @@ export function PetsModule() {
 
   const list = pets.data ?? [];
   const order = ["dobby", "zara", "paco"];
-  const sorted = [...list].sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
+  // Pets fora da lista conhecida vêm depois, por nome.
+  const rank = (slug: string) => (order.includes(slug) ? order.indexOf(slug) : order.length);
+  const sorted = [...list].sort(
+    (a, b) => rank(a.slug) - rank(b.slug) || a.name.localeCompare(b.name, "pt-BR"),
+  );
+  const petNames = new Intl.ListFormat("pt-BR").format(sorted.map((p) => p.name));
   const byKind = (k: string) =>
     upcoming.filter(
       ({ c }) => c.kind === k || (k === "antiparasitario" && /bravecto/i.test(c.title)),
     );
   const verm = byKind("vermifugo");
   const vac = byKind("vacina");
+  const vacPending = vac.filter(({ c }) => {
+    const st = careStatus(c, todayISO());
+    return st === "regularizar" || st === "atrasado";
+  });
   const brav = upcoming.filter(({ c }) => /bravecto/i.test(c.title));
   const lastVerm =
     (care.data ?? [])
@@ -280,11 +304,15 @@ export function PetsModule() {
             onClick={() => setOpenPetId(p.id)}
             className={`garden-card garden-card-${p.slug} flex items-center gap-4 rounded-3xl p-4 text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--garden-leaf)]`}
           >
-            <img
-              src={p.photo_url ?? portraits[p.slug]}
-              alt={`Retrato de ${p.name}`}
-              className="size-24 shrink-0 rounded-full object-cover"
-            />
+            {(p.photo_url ?? portraits[p.slug]) ? (
+              <img
+                src={p.photo_url ?? portraits[p.slug]}
+                alt={`Retrato de ${p.name}`}
+                className="size-24 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <Initial name={p.name} className="size-24 text-4xl" />
+            )}
             <span className="min-w-0 flex-1">
               <span className="block font-display text-2xl font-bold text-[var(--garden-ink)]">
                 {p.name}
@@ -332,7 +360,7 @@ export function PetsModule() {
             <CareRow
               icon={<Pill className="size-5" />}
               title="Vermífugo – Endogard"
-              sub="Para Dobby, Zara e Paco"
+              sub={petNames ? `Para ${petNames}` : "Para os pets"}
               a={lastVerm ? `Última dose ${fmtDate(lastVerm)}` : "Última dose não registrada"}
               b={nextVerm ? `Próxima dose ${fmtDate(nextVerm)}` : null}
             />
@@ -340,8 +368,8 @@ export function PetsModule() {
               icon={<Syringe className="size-5" />}
               title="Vacinas"
               sub={
-                vac.length
-                  ? `${vac.length} pendência(s) de regularização`
+                vacPending.length
+                  ? `${vacPending.length} pendência(s) de regularização`
                   : "Consultar datas cadastradas"
               }
               a={null}
@@ -376,7 +404,13 @@ export function PetsModule() {
         <p className="mb-3 text-xs text-[var(--garden-muted)]">
           Somente leitura; os lançamentos continuam na área Finanças.
         </p>
-        {!petFin.data?.length ? (
+        {petFin.isError ? (
+          <p role="alert" className="text-sm text-destructive">
+            Não foi possível carregar as despesas dos filhos.
+          </p>
+        ) : petFin.isPending ? (
+          <p className="text-sm text-[var(--garden-muted)]">Carregando…</p>
+        ) : !petFin.data?.length ? (
           <EmptyNote>Nenhuma despesa dos filhos encontrada.</EmptyNote>
         ) : (
           <ul className="divide-y divide-[var(--garden-line)] text-sm text-[var(--garden-ink)]">
@@ -500,7 +534,7 @@ function PetCard({ pet, care, onChanged }: { pet: Pet; care: Care[]; onChanged: 
               className="size-16 rounded-full object-cover"
             />
           ) : (
-            <Mascot slug={pet.slug} />
+            <Mascot slug={pet.slug} name={pet.name} />
           )}
           <div>
             <h3 className="text-lg font-semibold">{pet.name}</h3>
@@ -560,7 +594,7 @@ function PetCard({ pet, care, onChanged }: { pet: Pet; care: Care[]; onChanged: 
                   size="sm"
                   aria-label={`Excluir ${c.title}`}
                   onClick={() => {
-                    if (confirmDiscard(true)) delCare.mutate(c.id);
+                    if (confirmDelete(c.title)) delCare.mutate(c.id);
                   }}
                 >
                   <Trash2 />
@@ -949,7 +983,7 @@ function ContactsBlock({
                   size="sm"
                   aria-label={`Excluir ${c.name}`}
                   onClick={() => {
-                    if (confirmDiscard(true)) del.mutate(c.id);
+                    if (confirmDelete(c.name)) del.mutate(c.id);
                   }}
                 >
                   <Trash2 />

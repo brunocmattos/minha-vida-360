@@ -21,6 +21,14 @@ describe("Cuidados sem inferir aplicações", () => {
     expect(careStatus(care, "2026-10-17")).toBe("previsto");
     expect(care.done_date).toBeNull();
   });
+  it("vacina aplicada depois do vencimento deixa de ser pendência", () => {
+    const care = { overdue_since: "2026-08-18", done_date: "2026-09-01", next_date: "2027-09-01" };
+    expect(careStatus(care, "2026-10-17")).toBe("previsto");
+    expect(careScheduleDate(care)).toBe("2027-09-01");
+    expect(careStatus({ ...care, done_date: "2026-08-17", next_date: null }, "2026-10-17")).toBe(
+      "regularizar",
+    );
+  });
   it("previsão passada fica atrasada sem marcar realização", () => {
     expect(
       careStatus({ overdue_since: null, done_date: null, next_date: "2026-10-27" }, "2026-10-28"),

@@ -14,7 +14,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { EmptyNote } from "@/components/cards";
-import { confirmDiscard } from "@/components/back-button";
+import { confirmDelete, confirmDiscard } from "@/components/back-button";
+import { fetchAllRows } from "@/lib/fetch-all";
 import { AREAS, getArea } from "@/lib/areas";
 import {
   PRIORITY_LABEL,
@@ -49,12 +50,15 @@ const EMPTY: Fields = {
 const PRIO_ORDER: Record<Priority, number> = { alta: 0, normal: 1, baixa: 2 };
 
 async function fetchTasks(): Promise<Task[]> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("id,title,done,completed_at,area_slug,priority,due_date,recurrence")
-    .order("created_at");
-  if (error) throw error;
-  return data as Task[];
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from("tasks")
+      .select("id,title,done,completed_at,area_slug,priority,due_date,recurrence")
+      .order("created_at")
+      .order("id")
+      .range(from, to),
+  );
+  return rows as Task[];
 }
 
 const dtFmt = new Intl.DateTimeFormat("pt-BR", {
@@ -174,7 +178,11 @@ export function TaskChecklist() {
   const toggle = useMutation({
     mutationFn: async (t: Task) => {
       if (!t.done && t.recurrence !== "none") {
-        const nextDue = nextDueDate(t.recurrence, todaySP());
+        const nextDue = nextDueDate(
+          t.recurrence,
+          todaySP(),
+          t.due_date ? Number(t.due_date.slice(8, 10)) : undefined,
+        );
         if (!nextDue) throw new Error("Próxima data indisponível");
         const { error } = await supabase.rpc("complete_recurring_task", {
           p_task_id: t.id,
@@ -201,6 +209,10 @@ export function TaskChecklist() {
     onSuccess: refresh,
     onError,
   });
+
+  function askDelete(t: Task) {
+    if (confirmDelete(t.title, "a tarefa")) remove.mutate(t.id);
+  }
 
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -371,8 +383,10 @@ export function TaskChecklist() {
                       onClick={() => toggle.mutate(t)}
                       disabled={toggle.isPending}
                       aria-label={`Concluir "${t.title}"`}
-                      className="grid size-6 shrink-0 place-items-center rounded-full border-2 border-primary transition"
-                    />
+                      className="group/check size-10 shrink-0 p-0"
+                    >
+                      <span className="size-6 rounded-full border-2 border-primary transition group-hover/check:bg-primary/10" />
+                    </Button>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm">{t.title}</p>
                       <p className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">
@@ -401,31 +415,33 @@ export function TaskChecklist() {
                         )}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setEditId(t.id);
-                        setEdit({
-                          title: t.title,
-                          area_slug: t.area_slug,
-                          priority: t.priority,
-                          due_date: t.due_date,
-                          recurrence: t.recurrence,
-                        });
-                      }}
-                      aria-label={`Editar "${t.title}"`}
-                      className="rounded-md p-1.5 text-muted-foreground hover:bg-card hover:text-foreground"
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => remove.mutate(t.id)}
-                      aria-label={`Excluir "${t.title}"`}
-                      className="rounded-md p-1.5 text-muted-foreground hover:bg-card hover:text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setEditId(t.id);
+                          setEdit({
+                            title: t.title,
+                            area_slug: t.area_slug,
+                            priority: t.priority,
+                            due_date: t.due_date,
+                            recurrence: t.recurrence,
+                          });
+                        }}
+                        aria-label={`Editar "${t.title}"`}
+                        className="size-10 rounded-md p-0 text-muted-foreground hover:bg-card hover:text-foreground"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => askDelete(t)}
+                        aria-label={`Excluir "${t.title}"`}
+                        className="size-10 rounded-md p-0 text-muted-foreground hover:bg-card hover:text-destructive"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
                   </li>
                 ),
               )}
@@ -468,15 +484,15 @@ export function TaskChecklist() {
                         variant="ghost"
                         onClick={() => toggle.mutate(t)}
                         aria-label={`Reabrir "${t.title}"`}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        className="size-10 rounded-md p-0 text-muted-foreground hover:bg-muted hover:text-foreground"
                       >
                         <Undo2 className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
-                        onClick={() => remove.mutate(t.id)}
+                        onClick={() => askDelete(t)}
                         aria-label={`Excluir "${t.title}"`}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-destructive"
+                        className="ml-1 size-10 rounded-md p-0 text-muted-foreground hover:bg-muted hover:text-destructive"
                       >
                         <Trash2 className="size-4" />
                       </Button>

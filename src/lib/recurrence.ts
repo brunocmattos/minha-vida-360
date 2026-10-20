@@ -19,8 +19,12 @@ export function todaySP(d = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(d);
 }
 
-/** Próxima data: regras flexíveis contam a partir do dia em que foi feita. */
-export function nextDueDate(rule: Recurrence, doneOn: string): string | null {
+/**
+ * Próxima data: regras flexíveis contam a partir do dia em que foi feita.
+ * Mensal usa `anchorDay` (dia do vencimento) em vez do dia da conclusão, limitado ao fim do mês.
+ * shortcut: o dia só é lembrado pelo vencimento atual; se ele já foi encurtado (31→28/fev), o 31 se perde. Guardar o dia original exigiria coluna nova.
+ */
+export function nextDueDate(rule: Recurrence, doneOn: string, anchorDay?: number): string | null {
   if (rule === "none") return null;
   const [y = 0, m = 1, d = 1] = doneOn.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
@@ -30,7 +34,7 @@ export function nextDueDate(rule: Recurrence, doneOn: string): string | null {
   else {
     const target = new Date(Date.UTC(y, m, 1));
     const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-    target.setUTCDate(Math.min(d, last));
+    target.setUTCDate(Math.min(anchorDay ?? d, last));
     return target.toISOString().slice(0, 10);
   }
   return dt.toISOString().slice(0, 10);

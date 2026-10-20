@@ -10,4 +10,8 @@ describe("nextDueDate", () => {
   it("semanal avança 7 dias", () => expect(nextDueDate("weekly", "2026-12-28")).toBe("2027-01-04"));
   it("mensal respeita fim de mês", () =>
     expect(nextDueDate("monthly", "2026-01-31")).toBe("2026-02-28"));
+  it("mensal volta ao dia original depois de um mês curto", () => {
+    expect(nextDueDate("monthly", "2026-02-28", 31)).toBe("2026-03-31");
+    expect(nextDueDate("monthly", "2026-12-20", 15)).toBe("2027-01-15");
+  });
 });

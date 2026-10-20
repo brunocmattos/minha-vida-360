@@ -22,3 +22,8 @@ export function BackButton() {
 export function confirmDiscard(dirty: boolean) {
   return !dirty || window.confirm("Descartar as alterações não salvas?");
 }
+
+/** Confirma a exclusão de um item; `noun` opcional vem antes do nome (ex.: "a tarefa"). */
+export function confirmDelete(label: string, noun = "") {
+  return window.confirm(`Excluir ${noun ? `${noun} ` : ""}“${label}”? Isso não pode ser desfeito.`);
+}
