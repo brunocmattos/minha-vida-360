@@ -1,10 +1,83 @@
 import { expect, it } from "vitest";
-import { accountBalance, accountMovement, type Opening, type Transfer } from "@/lib/finance-balances";
+import {
+  accountBalance,
+  accountMovement,
+  type Opening,
+  type Transfer,
+} from "@/lib/finance-balances";
 import { summarizeMonth, type Entry } from "@/lib/finance";
-const opening: Opening = {id:"o",wallet:"banco",competence:"2026-11-01",amount:1000,included:true,label:null};
-const entry: Entry = {id:"e",kind:"receita",description:"test",category_id:null,amount_planned:600,amount_paid:0,due_date:"2026-11-05",paid_date:null,notes:null,recurrence_id:null,competence:"2026-11-01"};
-it("abertura informada não conta previsões como dinheiro",()=>{expect(accountBalance([entry],[],[opening],"banco","2026-11-01").closing).toBe(1000);});
-it("excluir abertura do cálculo mantém seu valor cadastrado",()=>{const b=accountBalance([],[],[{...opening,included:false}],"banco","2026-11-01");expect(b.opening).toBe(1000);expect(b.closing).toBe(0);});
-it("dezembro transporta fechamento confirmado e sobrescrita não altera novembro",()=>{const es=[{...entry,amount_paid:100,paid_date:"2026-11-05"}];expect(accountBalance(es,[],[opening],"banco","2026-12-01").opening).toBe(1100);const os=[opening,{...opening,id:"d",competence:"2026-12-01",amount:50}];expect(accountBalance(es,[],os,"banco","2026-12-01").closing).toBe(50);expect(accountBalance(es,[],os,"banco","2026-11-01").closing).toBe(1100);});
-it("transferência debita e credita sem alterar receitas/despesas e reversão zera ambos",()=>{const t:Transfer={id:"t",from_wallet:"banco",to_wallet:"poupanca",amount:100,transfer_date:"2026-11-06",reversed_at:null};expect(accountMovement([], [t],"banco","2026-11-01").net).toBe(-100);expect(accountMovement([], [t],"poupanca","2026-11-01").net).toBe(100);expect(summarizeMonth([],"2026-11-01").cash).toBe(0);expect(accountMovement([],[{...t,reversed_at:"2026-11-07"}],"banco","2026-11-01").net).toBe(0);});
-it("Pluxee e iFood confirmados pertencem a saldos separados fora do banco",()=>{const es:Entry[]=[{...entry,wallet:"beneficio",benefit_account:"pluxee",amount_paid:600,paid_date:"2026-11-01"},{...entry,id:"i",wallet:"beneficio",benefit_account:"ifood",amount_paid:50,paid_date:"2026-11-01"}];expect(accountMovement(es,[],"pluxee","2026-11-01").incoming).toBe(600);expect(accountMovement(es,[],"ifood","2026-11-01").incoming).toBe(50);expect(accountMovement(es,[],"banco","2026-11-01").net).toBe(0);expect(accountBalance(es,[],[],"poupanca","2026-11-01").closing).toBeNull();});
+const opening: Opening = {
+  id: "o",
+  wallet: "banco",
+  competence: "2026-11-01",
+  amount: 1000,
+  included: true,
+  label: null,
+};
+const entry: Entry = {
+  id: "e",
+  kind: "receita",
+  description: "test",
+  category_id: null,
+  amount_planned: 600,
+  amount_paid: 0,
+  due_date: "2026-11-05",
+  paid_date: null,
+  notes: null,
+  recurrence_id: null,
+  competence: "2026-11-01",
+};
+it("abertura informada não conta previsões como dinheiro", () => {
+  expect(accountBalance([entry], [], [opening], "banco", "2026-11-01").closing).toBe(1000);
+});
+it("excluir abertura do cálculo mantém seu valor cadastrado", () => {
+  const b = accountBalance([], [], [{ ...opening, included: false }], "banco", "2026-11-01");
+  expect(b.opening).toBe(1000);
+  expect(b.closing).toBe(0);
+});
+it("dezembro transporta fechamento confirmado e sobrescrita não altera novembro", () => {
+  const es = [{ ...entry, amount_paid: 100, paid_date: "2026-11-05" }];
+  expect(accountBalance(es, [], [opening], "banco", "2026-12-01").opening).toBe(1100);
+  const os = [opening, { ...opening, id: "d", competence: "2026-12-01", amount: 50 }];
+  expect(accountBalance(es, [], os, "banco", "2026-12-01").closing).toBe(50);
+  expect(accountBalance(es, [], os, "banco", "2026-11-01").closing).toBe(1100);
+});
+it("transferência debita e credita sem alterar receitas/despesas e reversão zera ambos", () => {
+  const t: Transfer = {
+    id: "t",
+    from_wallet: "banco",
+    to_wallet: "poupanca",
+    amount: 100,
+    transfer_date: "2026-11-06",
+    reversed_at: null,
+  };
+  expect(accountMovement([], [t], "banco", "2026-11-01").net).toBe(-100);
+  expect(accountMovement([], [t], "poupanca", "2026-11-01").net).toBe(100);
+  expect(summarizeMonth([], "2026-11-01").cash).toBe(0);
+  expect(
+    accountMovement([], [{ ...t, reversed_at: "2026-11-07" }], "banco", "2026-11-01").net,
+  ).toBe(0);
+});
+it("Pluxee e iFood confirmados pertencem a saldos separados fora do banco", () => {
+  const es: Entry[] = [
+    {
+      ...entry,
+      wallet: "beneficio",
+      benefit_account: "pluxee",
+      amount_paid: 600,
+      paid_date: "2026-11-01",
+    },
+    {
+      ...entry,
+      id: "i",
+      wallet: "beneficio",
+      benefit_account: "ifood",
+      amount_paid: 50,
+      paid_date: "2026-11-01",
+    },
+  ];
+  expect(accountMovement(es, [], "pluxee", "2026-11-01").incoming).toBe(600);
+  expect(accountMovement(es, [], "ifood", "2026-11-01").incoming).toBe(50);
+  expect(accountMovement(es, [], "banco", "2026-11-01").net).toBe(0);
+  expect(accountBalance(es, [], [], "poupanca", "2026-11-01").closing).toBeNull();
+});

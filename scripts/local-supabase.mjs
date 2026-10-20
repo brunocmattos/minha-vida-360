@@ -11,7 +11,11 @@ const PUBLISHABLE_KEY = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
 const SECRET_KEY = "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
 
 // Login do app: nome "teste" vira teste@minhavida360.app (ver usernameToEmail em src/routes/auth.tsx)
-export const TEST_USER = { username: "teste", email: "teste@minhavida360.app", password: "teste-local-360" };
+export const TEST_USER = {
+  username: "teste",
+  email: "teste@minhavida360.app",
+  password: "teste-local-360",
+};
 
 const cmd = process.argv[2];
 
@@ -34,7 +38,9 @@ if (cmd === "seed") {
     SUPABASE_PUBLISHABLE_KEY: PUBLISHABLE_KEY,
   };
   const cwd = fileURLToPath(new URL("..", import.meta.url));
-  spawn("npx", ["vite", "dev"], { cwd, env, stdio: "inherit", shell: true }).on("exit", (c) => process.exit(c ?? 0));
+  spawn("npx", ["vite", "dev"], { cwd, env, stdio: "inherit", shell: true }).on("exit", (c) =>
+    process.exit(c ?? 0),
+  );
 } else {
   console.error("uso: node scripts/local-supabase.mjs <seed|dev>");
   process.exit(1);

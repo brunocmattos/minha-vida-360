@@ -8,7 +8,11 @@ export const RECURRENCE_LABEL: Record<Recurrence, string> = {
   weekly: "Semanal (flexível)",
   monthly: "Mensal (flexível)",
 };
-export const PRIORITY_LABEL: Record<Priority, string> = { baixa: "Baixa", normal: "Normal", alta: "Alta" };
+export const PRIORITY_LABEL: Record<Priority, string> = {
+  baixa: "Baixa",
+  normal: "Normal",
+  alta: "Alta",
+};
 
 /** Hoje (YYYY-MM-DD) no fuso America/Sao_Paulo. */
 export function todaySP(d = new Date()): string {

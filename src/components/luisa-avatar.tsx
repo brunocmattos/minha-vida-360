@@ -29,7 +29,13 @@ export function LuisaAvatar({ size = 40, className }: { size?: number; className
       <circle cx="24" cy="41" r="2.2" fill="#F2A68C" opacity="0.7" />
       <circle cx="40" cy="41" r="2.2" fill="#F2A68C" opacity="0.7" />
       {/* sorriso */}
-      <path d="M28 42.5c1.4 1.6 6.6 1.6 8 0" stroke="#3B2A24" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+      <path
+        d="M28 42.5c1.4 1.6 6.6 1.6 8 0"
+        stroke="#3B2A24"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        fill="none"
+      />
       {/* sardas */}
       <circle cx="28.5" cy="39.5" r="0.5" fill="#D98E6A" />
       <circle cx="35.5" cy="39.5" r="0.5" fill="#D98E6A" />

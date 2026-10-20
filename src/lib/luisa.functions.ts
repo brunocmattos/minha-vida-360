@@ -38,12 +38,15 @@ async function buildContext(supabase: any): Promise<string> {
     .order("next_date", { ascending: true })
     .limit(10);
   const careLines = (care ?? []).map(
-    (c: any) => `- ${c.pet_profiles?.name ?? "?"}: ${c.title} (${c.overdue_since ? `pendente desde ${c.overdue_since}` : `previsto ${c.next_date}`})`,
+    (c: any) =>
+      `- ${c.pet_profiles?.name ?? "?"}: ${c.title} (${c.overdue_since ? `pendente desde ${c.overdue_since}` : `previsto ${c.next_date}`})`,
   );
   return [
     `Hoje é ${today} (fuso America/Sao_Paulo). Competência atual: ${month}.`,
     `Resumo financeiro do mês (dados reais): receitas previstas R$ ${s.plannedIn.toFixed(2)}, recebidas R$ ${s.realizedIn.toFixed(2)}; despesas previstas R$ ${s.plannedOut.toFixed(2)}, pagas R$ ${s.realizedOut.toFixed(2)}.`,
-    careLines.length ? `Próximos cuidados dos filhos (pets):\n${careLines.join("\n")}` : "Sem cuidados de pets pendentes registrados.",
+    careLines.length
+      ? `Próximos cuidados dos filhos (pets):\n${careLines.join("\n")}`
+      : "Sem cuidados de pets pendentes registrados.",
   ].join("\n");
 }
 
@@ -111,7 +114,10 @@ export const luisaSend = createServerFn({ method: "POST" })
     const result = streamText({
       model: provider.responses(MODEL),
       system: `${SYSTEM}\n${contextBlock}`,
-      messages: (history ?? []).map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content })),
+      messages: (history ?? []).map((m: any) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      })),
       output: Output.object({ schema: actionSchema }),
       providerOptions: {
         openai: {
@@ -168,7 +174,10 @@ export const luisaConfirm = createServerFn({ method: "POST" })
     if (action.status !== "pendente") throw new Error("Esta ação já foi tratada.");
 
     if (!data.approved) {
-      await supabase.from("luisa_messages").update({ action: { ...action, status: "cancelada" } as any }).eq("id", msg.id);
+      await supabase
+        .from("luisa_messages")
+        .update({ action: { ...action, status: "cancelada" } as any })
+        .eq("id", msg.id);
       return { status: "cancelada" as const };
     }
 
@@ -197,6 +206,9 @@ export const luisaConfirm = createServerFn({ method: "POST" })
       if (error) throw new Error("Não consegui gravar o registro do diário.");
     }
 
-    await supabase.from("luisa_messages").update({ action: { ...action, status: "confirmada" } as any }).eq("id", msg.id);
+    await supabase
+      .from("luisa_messages")
+      .update({ action: { ...action, status: "confirmada" } as any })
+      .eq("id", msg.id);
     return { status: "confirmada" as const };
   });

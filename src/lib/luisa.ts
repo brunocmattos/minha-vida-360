@@ -46,7 +46,13 @@ export function validateLuisaAction(raw: unknown): LuisaAction | null {
   if (type === "registrar_diario") {
     const content = cleanText(r["content"], 2000);
     if (!content) return null;
-    return { type, content, date: cleanDate(r["date"]), area_slug: cleanText(r["area_slug"], 40), status: "pendente" };
+    return {
+      type,
+      content,
+      date: cleanDate(r["date"]),
+      area_slug: cleanText(r["area_slug"], 40),
+      status: "pendente",
+    };
   }
   return null;
 }
@@ -54,7 +60,8 @@ export function validateLuisaAction(raw: unknown): LuisaAction | null {
 /** Interpreta a saída JSON do modelo: { reply, action? }. Nunca lança. */
 export function parseLuisaOutput(raw: unknown): { reply: string; action: LuisaAction | null } {
   const obj = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const reply = cleanText(obj["reply"], 4000) ?? "Não consegui entender. Pode repetir de outro jeito?";
+  const reply =
+    cleanText(obj["reply"], 4000) ?? "Não consegui entender. Pode repetir de outro jeito?";
   return { reply, action: validateLuisaAction(obj["action"]) };
 }
 

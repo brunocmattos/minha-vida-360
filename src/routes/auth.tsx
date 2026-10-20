@@ -17,11 +17,15 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const inputCls = "w-full rounded-md border bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring";
+const inputCls =
+  "w-full rounded-md border bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-ring";
 
 /** O nome de usuário é convertido num e-mail interno (o login exige e-mail). */
 export function usernameToEmail(username: string) {
-  return `${username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`;
+  return `${username
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`;
 }
 
 function AuthPage() {
@@ -32,13 +36,19 @@ function AuthPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => { if (data.user) navigate({ to: "/casa", replace: true }); });
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate({ to: "/casa", replace: true });
+    });
   }, [navigate]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    setBusy(true); setError("");
-    const { error } = await supabase.auth.signInWithPassword({ email: usernameToEmail(username), password });
+    setBusy(true);
+    setError("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: usernameToEmail(username),
+      password,
+    });
     setBusy(false);
     if (error) setError("Nome ou senha incorretos.");
     else navigate({ to: "/casa", replace: true });
@@ -48,16 +58,37 @@ function AuthPage() {
     <div className="grid min-h-screen place-items-center bg-background px-4 py-10">
       <div className="w-full max-w-sm rounded-lg border bg-card p-7 shadow-lift">
         <div className="mb-6 text-center">
-          <span className="mx-auto mb-3 grid size-12 place-items-center rounded-md bg-secondary font-display text-lg font-bold text-primary">360</span>
+          <span className="mx-auto mb-3 grid size-12 place-items-center rounded-md bg-secondary font-display text-lg font-bold text-primary">
+            360
+          </span>
           <h1 className="text-2xl font-semibold">Minha Vida 360</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Seu espaço acolhedor para organizar a vida.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Seu espaço acolhedor para organizar a vida.
+          </p>
         </div>
         <form onSubmit={submit} className="space-y-3">
-          <input className={inputCls} required autoCapitalize="none" autoComplete="username" placeholder="Nome"
-            value={username} onChange={(e) => setUsername(e.target.value)} />
-          <input className={inputCls} type="password" required autoComplete="current-password" placeholder="Senha"
-            value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button disabled={busy} className="w-full rounded-md bg-primary py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:shadow-lift disabled:opacity-60">
+          <input
+            className={inputCls}
+            required
+            autoCapitalize="none"
+            autoComplete="username"
+            placeholder="Nome"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            className={inputCls}
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            disabled={busy}
+            className="w-full rounded-md bg-primary py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:shadow-lift disabled:opacity-60"
+          >
             {busy ? "Aguarde..." : "Entrar"}
           </Button>
         </form>

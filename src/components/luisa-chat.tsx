@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type Convo = { id: string; title: string; updated_at: string };
-type Msg = { id: string; role: "user" | "assistant"; content: string; action: LuisaAction | null; created_at: string };
+type Msg = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  action: LuisaAction | null;
+  created_at: string;
+};
 
 export function LuisaChat() {
   const [open, setOpen] = useState(false);
@@ -28,7 +34,9 @@ export function LuisaChat() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
   const [micSupported] = useState(
-    () => typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window),
+    () =>
+      typeof window !== "undefined" &&
+      ("SpeechRecognition" in window || "webkitSpeechRecognition" in window),
   );
   const [listening, setListening] = useState(false);
 
@@ -115,12 +123,17 @@ export function LuisaChat() {
       void loadConvos();
       // Título da conversa = primeira mensagem
       if (messages.length === 0) {
-        await supabase.from("luisa_conversations").update({ title: text.slice(0, 60) }).eq("id", id);
+        await supabase
+          .from("luisa_conversations")
+          .update({ title: text.slice(0, 60) })
+          .eq("id", id);
         void loadConvos();
       }
       void saved;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "A Luísa não conseguiu responder agora. Tente de novo.");
+      setError(
+        e instanceof Error ? e.message : "A Luísa não conseguiu responder agora. Tente de novo.",
+      );
     } finally {
       setSending(false);
     }
@@ -188,21 +201,40 @@ export function LuisaChat() {
               <p className="text-sm font-bold">Luísa</p>
               <p className="text-xs text-muted-foreground">Sua assistente pessoal</p>
             </div>
-            <Button variant="ghost" size="icon" aria-label="Histórico de conversas" onClick={() => setShowHistory((v) => !v)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Histórico de conversas"
+              onClick={() => setShowHistory((v) => !v)}
+            >
               <History className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Nova conversa" onClick={() => void newConversation()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Nova conversa"
+              onClick={() => void newConversation()}
+            >
               <Plus className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Fechar chat" onClick={() => setOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Fechar chat"
+              onClick={() => setOpen(false)}
+            >
               <X className="size-4" />
             </Button>
           </div>
 
           {showHistory ? (
             <div className="flex-1 overflow-y-auto p-3">
-              <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">Conversas</p>
-              {convos.length === 0 && <p className="px-1 text-sm text-muted-foreground">Nenhuma conversa ainda.</p>}
+              <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Conversas
+              </p>
+              {convos.length === 0 && (
+                <p className="px-1 text-sm text-muted-foreground">Nenhuma conversa ainda.</p>
+              )}
               <ul className="space-y-1">
                 {convos.map((c) => (
                   <li key={c.id}>
@@ -227,13 +259,16 @@ export function LuisaChat() {
                   <LuisaAvatar size={56} className="mx-auto mb-3" />
                   <p className="font-semibold text-foreground">Oi! Eu sou a Luísa.</p>
                   <p className="mt-1">
-                    Posso registrar uma despesa (“gastei R$120 no mercado”) ou anotar no seu diário. Eu sempre mostro um
-                    resumo para você confirmar antes de gravar.
+                    Posso registrar uma despesa (“gastei R$120 no mercado”) ou anotar no seu diário.
+                    Eu sempre mostro um resumo para você confirmar antes de gravar.
                   </p>
                 </div>
               )}
               {messages.map((m) => (
-                <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+                <div
+                  key={m.id}
+                  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+                >
                   <div
                     className={cn(
                       "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm",
@@ -249,7 +284,9 @@ export function LuisaChat() {
                     )}
                     {m.action && m.action.status === "pendente" && (
                       <div className="mt-2 rounded-xl border bg-card p-3 text-card-foreground">
-                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Confirmar registro</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                          Confirmar registro
+                        </p>
                         <p className="mt-1 text-sm font-semibold">{actionSummary(m.action)}</p>
                         <div className="mt-2 flex gap-2">
                           <Button
@@ -273,7 +310,9 @@ export function LuisaChat() {
                       </div>
                     )}
                     {m.action && m.action.status === "confirmada" && (
-                      <p className="mt-1.5 text-xs font-semibold text-green-500">✓ Registrado: {actionSummary(m.action)}</p>
+                      <p className="mt-1.5 text-xs font-semibold text-green-500">
+                        ✓ Registrado: {actionSummary(m.action)}
+                      </p>
                     )}
                     {m.action && m.action.status === "cancelada" && (
                       <p className="mt-1.5 text-xs text-muted-foreground">Registro descartado.</p>
@@ -286,7 +325,11 @@ export function LuisaChat() {
                   <LuisaAvatar size={24} /> digitando…
                 </div>
               )}
-              {error && <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+              {error && (
+                <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
               <div ref={bottomRef} />
             </div>
           )}
@@ -308,26 +351,30 @@ export function LuisaChat() {
                 aria-label="Mensagem para a Luísa"
                 className="min-w-0 w-full max-h-28 resize-none rounded-2xl border bg-background px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
               />
-              <div className="flex shrink-0 items-center gap-1">{micSupported && (
+              <div className="flex shrink-0 items-center gap-1">
+                {micSupported && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={listening ? "Parar gravação" : "Falar por microfone"}
+                    onClick={toggleMic}
+                    className={cn(
+                      "rounded-full",
+                      listening && "bg-destructive/15 text-destructive",
+                    )}
+                  >
+                    <Mic className="size-4" />
+                  </Button>
+                )}
                 <Button
-                  variant="ghost"
                   size="icon"
-                  aria-label={listening ? "Parar gravação" : "Falar por microfone"}
-                  onClick={toggleMic}
-                  className={cn("rounded-full", listening && "bg-destructive/15 text-destructive")}
+                  aria-label="Enviar mensagem"
+                  disabled={sending || !input.trim()}
+                  onClick={() => void handleSend()}
+                  className="rounded-full"
                 >
-                  <Mic className="size-4" />
+                  <Send className="size-4" />
                 </Button>
-              )}
-              <Button
-                size="icon"
-                aria-label="Enviar mensagem"
-                disabled={sending || !input.trim()}
-                onClick={() => void handleSend()}
-                className="rounded-full"
-              >
-                <Send className="size-4" />
-              </Button>
               </div>
             </div>
           </div>

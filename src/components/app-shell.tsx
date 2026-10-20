@@ -16,16 +16,34 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const Sun = MEU_DIA.icon;
   return (
     <nav className="flex flex-col gap-1">
-      <Link to="/casa" onClick={onNavigate} className={itemCls} activeProps={{ className: activeCls }}>
+      <Link
+        to="/casa"
+        onClick={onNavigate}
+        className={itemCls}
+        activeProps={{ className: activeCls }}
+      >
         <House className="size-4" /> Minha Casa
       </Link>
-      <Link to="/meu-dia" onClick={onNavigate} className={itemCls} activeProps={{ className: activeCls }}>
+      <Link
+        to="/meu-dia"
+        onClick={onNavigate}
+        className={itemCls}
+        activeProps={{ className: activeCls }}
+      >
         <Sun className="size-4" /> {MEU_DIA.name}
       </Link>
-      <div className="mt-3 mb-1 px-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Áreas</div>
+      <div className="mt-3 mb-1 px-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        Áreas
+      </div>
       {AREAS.map((a) => (
-        <Link key={a.slug} to="/area/$slug" params={{ slug: a.slug }} onClick={onNavigate}
-          className={itemCls} activeProps={{ className: activeCls }}>
+        <Link
+          key={a.slug}
+          to="/area/$slug"
+          params={{ slug: a.slug }}
+          onClick={onNavigate}
+          className={itemCls}
+          activeProps={{ className: activeCls }}
+        >
           <a.icon className="size-4" /> {a.short}
         </Link>
       ))}
@@ -36,7 +54,9 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
 function Brand() {
   return (
     <Link to="/casa" className="flex min-w-0 items-center gap-2">
-      <span className="grid size-9 place-items-center rounded-md bg-secondary font-display text-base font-bold text-primary">360</span>
+      <span className="grid size-9 place-items-center rounded-md bg-secondary font-display text-base font-bold text-primary">
+        360
+      </span>
       <span className="font-display text-lg font-semibold">Minha Vida 360</span>
     </Link>
   );
@@ -70,17 +90,32 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <header className="sticky top-0 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b bg-background/85 px-4 py-3 backdrop-blur md:hidden">
         <Brand />
-        <Button variant="ghost" aria-label="Abrir menu" onClick={() => setOpen(true)} className="rounded-xl p-2 hover:bg-secondary">
+        <Button
+          variant="ghost"
+          aria-label="Abrir menu"
+          onClick={() => setOpen(true)}
+          className="rounded-xl p-2 hover:bg-secondary"
+        >
           <Menu className="size-5" />
         </Button>
       </header>
 
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <Button variant="ghost" aria-label="Fechar menu" className="absolute inset-0 bg-foreground/20" onClick={() => setOpen(false)} />
+          <Button
+            variant="ghost"
+            aria-label="Fechar menu"
+            className="absolute inset-0 bg-foreground/20"
+            onClick={() => setOpen(false)}
+          />
           <div className="absolute inset-y-0 right-0 flex w-72 flex-col gap-4 overflow-y-auto bg-sidebar p-4 shadow-lift animate-in slide-in-from-right">
             <div className="flex justify-end">
-              <Button variant="ghost" aria-label="Fechar menu" onClick={() => setOpen(false)} className="rounded-xl p-2 hover:bg-sidebar-accent">
+              <Button
+                variant="ghost"
+                aria-label="Fechar menu"
+                onClick={() => setOpen(false)}
+                className="rounded-xl p-2 hover:bg-sidebar-accent"
+              >
                 <X className="size-5" />
               </Button>
             </div>
@@ -90,7 +125,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-8 md:py-10">{children}</main>
+      <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-8 md:py-10">
+        {children}
+      </main>
       <LuisaChat />
     </div>
   );

@@ -5,12 +5,21 @@ import { SoftCard } from "@/components/cards";
 import { Button } from "@/components/ui/button";
 import { openLuisaChat } from "@/components/luisa-chat";
 
-type DiaryEntry = { id: string; entry_date: string; area_slug: string | null; content: string; created_at: string };
+type DiaryEntry = {
+  id: string;
+  entry_date: string;
+  area_slug: string | null;
+  content: string;
+  created_at: string;
+};
 
 const fmtDate = (iso: string) =>
-  new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "long", year: "numeric" }).format(
-    new Date(`${iso}T12:00:00Z`),
-  );
+  new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${iso}T12:00:00Z`));
 
 export function DiaryModule() {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
@@ -18,7 +27,9 @@ export function DiaryModule() {
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [content, setContent] = useState("");
-  const [date, setDate] = useState(() => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()));
+  const [date, setDate] = useState(() =>
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()),
+  );
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -47,7 +58,9 @@ export function DiaryModule() {
     if (!content.trim() || saving) return;
     setSaving(true);
     setError(null);
-    const { error: err } = await supabase.from("diary_entries").insert({ content: content.trim(), entry_date: date });
+    const { error: err } = await supabase
+      .from("diary_entries")
+      .insert({ content: content.trim(), entry_date: date });
     setSaving(false);
     if (err) {
       setError("Não consegui salvar o registro.");
@@ -72,7 +85,8 @@ export function DiaryModule() {
     <div className="space-y-4">
       <SoftCard className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Seus registros ficam privados e só você os vê. Você também pode pedir para a Luísa anotar por você.
+          Seus registros ficam privados e só você os vê. Você também pode pedir para a Luísa anotar
+          por você.
         </p>
         <div className="flex gap-2">
           <Button variant="outline" className="rounded-full" onClick={openLuisaChat}>
@@ -111,19 +125,26 @@ export function DiaryModule() {
             <Button variant="ghost" className="rounded-full" onClick={cancel}>
               Cancelar
             </Button>
-            <Button className="rounded-full" disabled={saving || !content.trim()} onClick={() => void save()}>
+            <Button
+              className="rounded-full"
+              disabled={saving || !content.trim()}
+              onClick={() => void save()}
+            >
               Salvar
             </Button>
           </div>
         </SoftCard>
       )}
 
-      {error && <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+      {error && (
+        <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+      )}
       {loading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : entries.length === 0 ? (
         <SoftCard className="text-sm text-muted-foreground">
-          Nenhum registro ainda. Quando você escrever — aqui ou pela Luísa — ele aparece nesta lista.
+          Nenhum registro ainda. Quando você escrever — aqui ou pela Luísa — ele aparece nesta
+          lista.
         </SoftCard>
       ) : (
         <ul className="space-y-3">
@@ -131,10 +152,17 @@ export function DiaryModule() {
             <li key={e.id}>
               <SoftCard className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{fmtDate(e.entry_date)}</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    {fmtDate(e.entry_date)}
+                  </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm">{e.content}</p>
                 </div>
-                <Button variant="ghost" size="icon" aria-label="Excluir registro" onClick={() => void remove(e.id)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Excluir registro"
+                  onClick={() => void remove(e.id)}
+                >
                   <Trash2 className="size-4" />
                 </Button>
               </SoftCard>

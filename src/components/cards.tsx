@@ -3,17 +3,34 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function SoftCard({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("rounded-lg border bg-card p-5 shadow-soft", className)}>{children}</div>;
+  return (
+    <div className={cn("rounded-lg border bg-card p-5 shadow-soft", className)}>{children}</div>
+  );
 }
 
 export function SectionCard({
-  icon: Icon, title, tone = "bg-lavender", children, action,
-}: { icon: LucideIcon; title: string; tone?: string; children: ReactNode; action?: ReactNode }) {
+  icon: Icon,
+  title,
+  tone = "bg-lavender",
+  children,
+  action,
+}: {
+  icon: LucideIcon;
+  title: string;
+  tone?: string;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <SoftCard>
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <span className={cn("grid size-9 place-items-center rounded-md text-secondary-foreground", tone)}>
+          <span
+            className={cn(
+              "grid size-9 place-items-center rounded-md text-secondary-foreground",
+              tone,
+            )}
+          >
             <Icon className="size-4" />
           </span>
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -27,11 +44,21 @@ export function SectionCard({
 
 export function EmptyNote({ children }: { children: ReactNode }) {
   return (
-    <p className="rounded-md border bg-muted/60 px-4 py-3 text-sm text-muted-foreground">{children}</p>
+    <p className="rounded-md border bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+      {children}
+    </p>
   );
 }
 
-export function PageHeader({ title, subtitle, eyebrow }: { title: string; subtitle?: string; eyebrow?: string }) {
+export function PageHeader({
+  title,
+  subtitle,
+  eyebrow,
+}: {
+  title: string;
+  subtitle?: string;
+  eyebrow?: string;
+}) {
   return (
     <div className="mb-6">
       {eyebrow && <p className="mb-1 text-sm font-semibold capitalize text-primary">{eyebrow}</p>}

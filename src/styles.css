@@ -125,60 +125,173 @@
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-family: var(--font-display);
     letter-spacing: 0;
   }
 }
 
 @layer base {
-  html { color-scheme: dark; }
-  button, input, select, textarea { font: inherit; }
-  h1, h2, h3 { overflow-wrap: anywhere; }
-  h1, h2 { letter-spacing: 0; }
+  html {
+    color-scheme: dark;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  h1,
+  h2,
+  h3 {
+    overflow-wrap: anywhere;
+  }
+  h1,
+  h2 {
+    letter-spacing: 0;
+  }
 }
 
-.wallet-panel { border-top-color: var(--primary); }
-.finance-table { min-width: 960px; border-collapse: separate; border-spacing: 0; }
-.finance-table thead th { background: transparent; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.68rem; }
-.finance-table tbody tr { border-color: color-mix(in oklab, var(--border) 55%, transparent); transition: background-color 150ms; }
-.finance-table tbody tr:hover { background: color-mix(in oklab, var(--muted) 45%, transparent); }
-.fin-surface { border: 1px solid color-mix(in oklab, var(--border) 60%, transparent); background: color-mix(in oklab, var(--card) 88%, transparent); border-radius: 1.5rem; }
+.wallet-panel {
+  border-top-color: var(--primary);
+}
+.finance-table {
+  min-width: 960px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.finance-table thead th {
+  background: transparent;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+}
+.finance-table tbody tr {
+  border-color: color-mix(in oklab, var(--border) 55%, transparent);
+  transition: background-color 150ms;
+}
+.finance-table tbody tr:hover {
+  background: color-mix(in oklab, var(--muted) 45%, transparent);
+}
+.fin-surface {
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+  border-radius: 1.5rem;
+}
 .fin-hero {
   border-radius: 1.75rem;
   border: 1px solid color-mix(in oklab, var(--primary) 22%, var(--border));
   background:
-    radial-gradient(120% 140% at 100% 0%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 55%),
+    radial-gradient(
+      120% 140% at 100% 0%,
+      color-mix(in oklab, var(--primary) 18%, transparent),
+      transparent 55%
+    ),
     linear-gradient(145deg, oklch(0.24 0.012 290), oklch(0.18 0.006 285));
-  box-shadow: 0 24px 60px -28px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.06);
+  box-shadow:
+    0 24px 60px -28px oklch(0 0 0 / 0.7),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
 }
-.fin-nav-card { border-radius: 1.5rem; border: 1px solid color-mix(in oklab, var(--border) 60%, transparent); background: var(--card); transition: transform 180ms, border-color 180ms, background-color 180ms; }
-.fin-nav-card:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); background: color-mix(in oklab, var(--card) 80%, var(--primary) 6%); }
-.fin-nav-card:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
-.fin-field { border-radius: 9999px !important; border-color: color-mix(in oklab, var(--border) 70%, transparent) !important; background: var(--card) !important; }
-.font-display { font-family: var(--font-display); }
-.finance-ui > div > .rounded-lg { border-radius: 1.5rem; }
-.finance-ui table:not(.finance-table) th { font-weight: 500; padding: 12px; }
-.finance-ui table:not(.finance-table) td { padding: 14px 12px; }
-.finance-ui table:not(.finance-table) tr { border-color: color-mix(in oklab, var(--border) 50%, transparent); }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+.fin-nav-card {
+  border-radius: 1.5rem;
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  background: var(--card);
+  transition:
+    transform 180ms,
+    border-color 180ms,
+    background-color 180ms;
+}
+.fin-nav-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  background: color-mix(in oklab, var(--card) 80%, var(--primary) 6%);
+}
+.fin-nav-card:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.fin-field {
+  border-radius: 9999px !important;
+  border-color: color-mix(in oklab, var(--border) 70%, transparent) !important;
+  background: var(--card) !important;
+}
+.font-display {
+  font-family: var(--font-display);
+}
+.finance-ui > div > .rounded-lg {
+  border-radius: 1.5rem;
+}
+.finance-ui table:not(.finance-table) th {
+  font-weight: 500;
+  padding: 12px;
+}
+.finance-ui table:not(.finance-table) td {
+  padding: 14px 12px;
+}
+.finance-ui table:not(.finance-table) tr {
+  border-color: color-mix(in oklab, var(--border) 50%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
-.pet-mascot { animation: pet-bob 3.2s ease-in-out infinite; }
-@keyframes pet-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-@media (prefers-reduced-motion: reduce) { .pet-mascot { animation: none; } }
+.pet-mascot {
+  animation: pet-bob 3.2s ease-in-out infinite;
+}
+@keyframes pet-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-mascot {
+    animation: none;
+  }
+}
 
-progress { appearance: none; border: 0; background: var(--muted); overflow: hidden; }
-progress::-webkit-progress-bar { background: var(--muted); }
-progress::-webkit-progress-value { background: var(--primary); }
-progress::-moz-progress-bar { background: var(--primary); }
-progress.accent-income::-webkit-progress-value { background: var(--income); }
-progress.accent-income::-moz-progress-bar { background: var(--income); }
-progress.accent-expense::-webkit-progress-value { background: var(--expense); }
-progress.accent-expense::-moz-progress-bar { background: var(--expense); }
+progress {
+  appearance: none;
+  border: 0;
+  background: var(--muted);
+  overflow: hidden;
+}
+progress::-webkit-progress-bar {
+  background: var(--muted);
+}
+progress::-webkit-progress-value {
+  background: var(--primary);
+}
+progress::-moz-progress-bar {
+  background: var(--primary);
+}
+progress.accent-income::-webkit-progress-value {
+  background: var(--income);
+}
+progress.accent-income::-moz-progress-bar {
+  background: var(--income);
+}
+progress.accent-expense::-webkit-progress-value {
+  background: var(--expense);
+}
+progress.accent-expense::-moz-progress-bar {
+  background: var(--expense);
+}
 
 :root {
   --house-background: #faf9f5;
-  --house-focus: #7060A0;
+  --house-focus: #7060a0;
   --house-ink: #373d43;
   --house-roof: #a9aeb6;
   --house-wall: #ebe6dd;
@@ -198,11 +311,24 @@ progress.accent-expense::-moz-progress-bar { background: var(--expense); }
   --house-room-sala: #f5ebed;
   --house-room-jardim: #eaf2e8;
 }
-.house-canvas { background: var(--house-background); border-radius: 8px; }
-.house-viewport { width: 100%; min-width: 0; }
-.house-room > rect { transition: filter 150ms; }
-.house-room:hover > rect { filter: brightness(0.97); }
-.house-room:focus-visible > rect { stroke: var(--house-focus); stroke-width: 3; }
+.house-canvas {
+  background: var(--house-background);
+  border-radius: 8px;
+}
+.house-viewport {
+  width: 100%;
+  min-width: 0;
+}
+.house-room > rect {
+  transition: filter 150ms;
+}
+.house-room:hover > rect {
+  filter: brightness(0.97);
+}
+.house-room:focus-visible > rect {
+  stroke: var(--house-focus);
+  stroke-width: 3;
+}
 
 /* Ambientes temáticos claros (todos exceto Finanças) */
 .room-theme {
@@ -228,8 +354,12 @@ progress.accent-expense::-moz-progress-bar { background: var(--expense); }
   --income: oklch(0.48 0.12 155);
   --expense: oklch(0.52 0.16 25);
   --destructive: oklch(0.52 0.18 25);
-  --lavender: oklch(0.93 0.035 300); --rose: oklch(0.93 0.035 355); --cream: oklch(0.95 0.03 85);
-  --sage: oklch(0.93 0.035 155); --sky: oklch(0.93 0.035 240); --peach: oklch(0.94 0.035 50);
+  --lavender: oklch(0.93 0.035 300);
+  --rose: oklch(0.93 0.035 355);
+  --cream: oklch(0.95 0.03 85);
+  --sage: oklch(0.93 0.035 155);
+  --sky: oklch(0.93 0.035 240);
+  --peach: oklch(0.94 0.035 50);
   --scene-wall: oklch(0.95 0.025 var(--h));
   --scene-soft: oklch(0.88 0.045 var(--h));
   --scene-deep: oklch(0.76 0.07 var(--h));
@@ -244,19 +374,63 @@ progress.accent-expense::-moz-progress-bar { background: var(--expense); }
   overflow: hidden;
   box-shadow: 0 20px 50px -30px oklch(0 0 0 / 0.6);
 }
-.room-jardim { --h: 140; --scene-wall: oklch(0.93 0.04 220); --scene-soft: oklch(0.84 0.09 140); --scene-deep: oklch(0.72 0.11 145); }
-.room-quarto { --h: 295; }
-.room-banheiro { --h: 200; }
-.room-office { --h: 245; }
-.room-academia { --h: 120; }
-.room-cozinha { --h: 55; }
-.room-sala { --h: 355; }
-.room-banner { position: relative; margin: 0; border-bottom: 1px solid var(--border); }
-.room-tag { position: absolute; left: 1rem; top: 1rem; border-radius: 9999px; background: var(--card); color: var(--primary); padding: 0.35rem 0.9rem; font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; box-shadow: var(--shadow-soft); }
-.room-body { padding: 1.25rem; }
-@media (min-width: 768px) { .room-body { padding: 2rem; } }
-.room-theme .pet-mascot { filter: drop-shadow(0 4px 6px oklch(0 0 0 / 0.12)); }
-.room-theme, .room-theme * { border-color: var(--border); }
+.room-jardim {
+  --h: 140;
+  --scene-wall: oklch(0.93 0.04 220);
+  --scene-soft: oklch(0.84 0.09 140);
+  --scene-deep: oklch(0.72 0.11 145);
+}
+.room-quarto {
+  --h: 295;
+}
+.room-banheiro {
+  --h: 200;
+}
+.room-office {
+  --h: 245;
+}
+.room-academia {
+  --h: 120;
+}
+.room-cozinha {
+  --h: 55;
+}
+.room-sala {
+  --h: 355;
+}
+.room-banner {
+  position: relative;
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+.room-tag {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--primary);
+  padding: 0.35rem 0.9rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-soft);
+}
+.room-body {
+  padding: 1.25rem;
+}
+@media (min-width: 768px) {
+  .room-body {
+    padding: 2rem;
+  }
+}
+.room-theme .pet-mascot {
+  filter: drop-shadow(0 4px 6px oklch(0 0 0 / 0.12));
+}
+.room-theme,
+.room-theme * {
+  border-color: var(--border);
+}
 
 .garden-module {
   --garden-ink: oklch(0.28 0.04 160);
@@ -273,13 +447,39 @@ progress.accent-expense::-moz-progress-bar { background: var(--expense); }
   border-radius: 32px;
   padding: 0.75rem;
 }
-.garden-card { background: var(--garden-surface); box-shadow: 0 6px 20px -12px oklch(0.4 0.05 120 / 0.4); }
-.garden-card-dobby { background: oklch(0.97 0.03 85); }
-.garden-card-zara { background: oklch(0.96 0.03 15); }
-.garden-card-paco { background: oklch(0.96 0.03 240); }
-.garden-chip { border-radius: 999px; padding: 0.15rem 0.7rem; background: oklch(1 0 0 / 0.75); color: var(--garden-ink); }
-.garden-panel { background: oklch(0.96 0.03 150); }
-.garden-panel-blue { background: oklch(0.95 0.03 240); }
-.garden-module .text-muted-foreground { color: var(--garden-muted); }
-.garden-module { --foreground: oklch(0.28 0.04 160); --border: oklch(0.88 0.01 120); }
-.garden-module { --primary: oklch(0.5 0.13 150); --primary-foreground: oklch(0.99 0 0); }
+.garden-card {
+  background: var(--garden-surface);
+  box-shadow: 0 6px 20px -12px oklch(0.4 0.05 120 / 0.4);
+}
+.garden-card-dobby {
+  background: oklch(0.97 0.03 85);
+}
+.garden-card-zara {
+  background: oklch(0.96 0.03 15);
+}
+.garden-card-paco {
+  background: oklch(0.96 0.03 240);
+}
+.garden-chip {
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  background: oklch(1 0 0 / 0.75);
+  color: var(--garden-ink);
+}
+.garden-panel {
+  background: oklch(0.96 0.03 150);
+}
+.garden-panel-blue {
+  background: oklch(0.95 0.03 240);
+}
+.garden-module .text-muted-foreground {
+  color: var(--garden-muted);
+}
+.garden-module {
+  --foreground: oklch(0.28 0.04 160);
+  --border: oklch(0.88 0.01 120);
+}
+.garden-module {
+  --primary: oklch(0.5 0.13 150);
+  --primary-foreground: oklch(0.99 0 0);
+}

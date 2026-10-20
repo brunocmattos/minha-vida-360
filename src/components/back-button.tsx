@@ -5,10 +5,14 @@ import { ArrowLeft } from "lucide-react";
 export function BackButton() {
   const router = useRouter();
   return (
-    <button type="button" onClick={() => {
-      if (router.history.canGoBack()) router.history.back();
-      else router.navigate({ to: "/meu-dia" });
-    }} className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-primary">
+    <button
+      type="button"
+      onClick={() => {
+        if (router.history.canGoBack()) router.history.back();
+        else router.navigate({ to: "/meu-dia" });
+      }}
+      className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-primary"
+    >
       <ArrowLeft className="size-4" /> Voltar
     </button>
   );

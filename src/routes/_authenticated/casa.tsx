@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_authenticated/casa")({
   head: () => ({
     meta: [
       { title: "Minha Casa — Minha Vida 360" },
-      { name: "description", content: "Sua casa em corte transversal: cada cômodo abre uma área da sua vida." },
+      {
+        name: "description",
+        content: "Sua casa em corte transversal: cada cômodo abre uma área da sua vida.",
+      },
       { property: "og:title", content: "Minha Casa — Minha Vida 360" },
-      { property: "og:description", content: "Sua casa em corte transversal: cada cômodo abre uma área da sua vida." },
+      {
+        property: "og:description",
+        content: "Sua casa em corte transversal: cada cômodo abre uma área da sua vida.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -27,15 +33,17 @@ function CasaPage() {
   return (
     <div className="space-y-6">
       <div className="border-b pb-5 pt-2">
-        <p className="text-sm font-semibold capitalize text-muted-foreground">{now ? formatDateLong(now) : " "}</p>
+        <p className="text-sm font-semibold capitalize text-muted-foreground">
+          {now ? formatDateLong(now) : " "}
+        </p>
         <h1 className="mt-1 text-3xl font-semibold md:text-4xl">
-          {now ? greeting(now) : "Olá"}{name ? `, ${name}` : ""}
+          {now ? greeting(now) : "Olá"}
+          {name ? `, ${name}` : ""}
         </h1>
         <p className="mt-2 max-w-md text-muted-foreground">Bem-vinda à sua casa.</p>
       </div>
 
       <HouseCasa />
-
     </div>
   );
 }
