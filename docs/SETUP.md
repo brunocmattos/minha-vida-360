@@ -44,7 +44,7 @@ vezes, ele recusa.
 
 O repositório já existe e está atualizado: **[brunooutcore/minha-vida-360](https://github.com/brunooutcore/minha-vida-360)** (privado).
 Falta só ligar o backup: **Settings → Secrets and variables → Actions → New repository secret** →
-nome , valor = a connection string do passo 2. A partir daí roda sozinho **a cada 3 dias**
+nome `DATABASE_URL`, valor = a connection string do passo 2. A partir daí roda sozinho **a cada 3 dias**
 (aba Actions → backup; dá para rodar na hora com **Run workflow**). Até cadastrar o segredo, a rotina
 aparece como falha — é o aviso de que ainda não há backup.
 
