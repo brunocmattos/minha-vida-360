@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792116811148,
+      "tag": "0000_create_tasks",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792119175887,
+      "tag": "0001_smart_tasks",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792122545762,
+      "tag": "0002_finance_stage1",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792122591473,
+      "tag": "0003_finance_delete_unpaid_forecasts",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792125892022,
+      "tag": "0004_finance_nature",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792129170317,
+      "tag": "0005_finance_real_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792132073584,
+      "tag": "0006_finance_wallet_balances",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792183331521,
+      "tag": "0007_create_pets_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792209458238,
+      "tag": "0008_pet_care_pending_and_shared",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792211664198,
+      "tag": "0009_luisa_chat_diary",
+      "breakpoints": true
+    }
+  ]
+}
