@@ -1,7 +1,35 @@
 # Achados — Minha Vida 360
 
 Levantamento de 2026-10-20: teste funcional logado contra um Supabase local + leitura do código
-(segurança, bugs, deploy). Nada aqui foi corrigido ainda.
+(segurança, bugs, deploy). As linhas citadas abaixo são da versão original, antes dos consertos.
+
+## Placar (atualizado em 2026-10-20)
+
+**✅ Resolvidos no código** (com testes; 69 passando):
+
+- A1 Luísa com provedor próprio configurável (padrão DeepSeek) — falta só criar a chave (SETUP passo 6).
+- A3 Scripts de export/import testados ponta a ponta (troca de dono, transação, contagens conferidas);
+  backup automático a cada 3 dias. Falta **rodar** com a senha dela (SETUP passos 1 e 3).
+- B1 paginação além de 1000 linhas · B2 valor editado à mão não é mais sobrescrito (migration 0010) ·
+  B3 confirmação dupla da Luísa travada (testado com 2 cliques simultâneos: só 1 grava) ·
+  B4 histórico, "prevista × paga", erros de consulta, limite diário, datas impossíveis ·
+  B5 formulários só fecham quando salvou · B6 confirmações de exclusão claras ·
+  B7 arredondamentos, meses não gerados, "dia a definir", centavos · B8 diário resiliente ·
+  B9 pets além de 3; vacinas futuras não contam como pendência.
+- C1 parcial: formatação aplicada, lint de 1878 erros → 0. C3 Lovable e código morto removidos
+  (44 componentes, 42 dependências). C5 parcial: campos 16px, botões de tarefa 40px, login acessível.
+  C6 parcial: cabeçalhos de segurança, fora do Google, imagens remotas bloqueadas no chat.
+  C7 páginas de erro em português, textos corrigidos.
+
+**⏳ Ainda abertos**
+
+- A2 4 imagens — baixar do Lovable (aguarda o OK do Bruno).
+- A4 cadastro público — desligar no painel do Supabase novo (SETUP passo 2).
+- B7 restos: observações não ficam na recorrência (não há coluna); data no passado gera meses
+  vencidos; salvar recorrência de novo após falha na geração pode duplicar.
+- C7 tarefa mensal: ancorar no dia original exige coluna nova (hoje 31 → 28 → 28).
+- C1 dividir `finance-module.tsx`/`finance-wallets.tsx`; C2 dados pessoais fixos no código → Fase 3.
+- C4 PNGs de ~1 MB; C5 foco/Esc no chat e no menu; C6 CSP, tamanho máximo de textos, detalhes de RLS.
 
 **Origem de cada item**
 
