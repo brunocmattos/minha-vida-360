@@ -7,7 +7,7 @@ atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
 ultima_atividade: 2026-10-20
 proxima_acao: "Bruno: docs/SETUP.md passos 1-3 e 5 (export, Supabase, import, Vercel)"
-repo: github
+repo: git+remote
 tags: [pessoal, lovable-export, vercel, supabase]
 ---
 
