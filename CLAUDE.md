@@ -2,6 +2,7 @@
 tipo: projeto
 cliente: tayane
 produto: Minha Vida 360
+dominio: pessoal
 no_ar: não
 atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
