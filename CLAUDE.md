@@ -1,20 +1,26 @@
 ---
 tipo: projeto
 cliente: tayane
-produto: Minha Vida 360
+produto: comtay
 dominio: pessoal
 no_ar: não
 atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
-ultima_atividade: 2026-10-20
-proxima_acao: "Bruno: docs/SETUP.md passos 1-3 e 5 (export, Supabase, import, Vercel)"
+ultima_atividade: 2026-10-23
+proxima_acao: "Tayane: responder 1.1–1.4 da entrevista (contas, senha, dia da mudança, grátis/pago) + mandar extrato Santander; depois SETUP"
 repo: git+remote
 tags: [pessoal, lovable-export, vercel, supabase]
 ---
 
-# Minha Vida 360
+# comtay (ex-Minha Vida 360)
 
 ## Estado atual
+
+**2026-10-23 — entrevista com a Tayane respondida** ([docs/RESPOSTAS-TAYANE.md](docs/RESPOSTAS-TAYANE.md)):
+o app passa a se chamar **comtay** (domínio pretendido comtay.com.br), a Luísa vira o centro (registrar
+e analisar tudo conversando) e a visão de longo prazo é um mundo tipo jogo com a personagem dela.
+Plano refeito em [docs/ROADMAP.md](docs/ROADMAP.md). **Trava:** ela não respondeu 1.1–1.4 (contas,
+senha atual, dia da mudança, grátis/pago), sem as quais o SETUP não anda.
 
 Código pronto para Vercel + Supabase próprio, **sem dependência do Lovable**. Em 2026-10-20:
 69 testes, TypeScript e lint (0 erros) passando; build da Vercel validado; app testado em modo
@@ -106,7 +112,12 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 - **Luísa** fala com qualquer provedor compatível com OpenAI (chat completions, modo JSON). O modelo só
   propõe; gravar exige confirmação, reservada de forma atômica (`action->>status = 'pendente'`).
 - **Dados não estão no repo**: perfis dos pets, recorrências, contracheques e dívidas existem só no
-  banco; não há tela para criar perfil de pet nem contracheque. Backup = workflow `backup`.
+  banco; não há tela para criar perfil de pet (contracheque e saldo inicial já têm cadastro/edição:
+  `finance-extra.tsx`, `fin_openings`). Backup = workflow `backup`.
+- **Intenção da Tayane** está em `docs/RESPOSTAS-TAYANE.md`: consultar antes de decidir produto/UX.
+  Ela autorizou a Luísa a ler **todas** as áreas (inclusive diário, saúde, espiritualidade) e o Bruno
+  a ver os dados reais pra testar.
+- **Toda área nova nasce com 3 peças**: tela + ações da Luísa ("propõe → confirma") + histórico.
 - **Fotos ficam em `public/images/`**: trocar o arquivo mantendo o nome troca a foto no app.
 - `AGENTS.md` tem as decisões de design de domínio; `roadmap.md` é o histórico do Lovable.
 - npm trava na máquina do Bruno por `cafile` do Kaspersky no `~/.npmrc` (`UNABLE_TO_GET_ISSUER_CERT_LOCALLY`);
@@ -116,8 +127,12 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 
 Plano completo em [docs/ROADMAP.md](docs/ROADMAP.md). Resumo:
 
-- [ ] Fase 1 — pôr no ar: seguir [docs/SETUP.md](docs/SETUP.md) (contas, export/import, Vercel)
-- [x] Fase 2 — consertos 🔴/🟠 que não dependem das contas (ver ACHADOS)
-- [ ] Fase 3 — deixar fácil de mudar (tema/conteúdo/imagens num lugar só)
-- [ ] Fase 4 — Luísa: criar a chave DeepSeek e validar com uso real
-- [ ] Fase 5 — mapa/mini-jogo das áreas da vida
+- [ ] Tayane responder 1.1–1.4 + mandar um extrato do Santander (mensagem pronta no worklog de 2026-10-23)
+- [ ] Fase 1 — pôr no ar como comtay: SETUP + domínio, e-mail real, 2FA, backup diário, PWA, região `gru1`
+- [ ] Fase 1b — ela mexer pelo celular (Claude Pro + prévias da Vercel)
+- [ ] Fase 2 — completar Finanças/Meu Dia/Filhos (contas cadastráveis, 24 meses, extrato, novo pet, lembretes)
+- [ ] Fase 3 — Luísa integrada com Claude ou GPT (ações por área, leitura de tudo)
+- [ ] Fase 4/5 — novas áreas: Casa → Carro → Saúde → demais
+- [ ] Fase 6 — histórico, calendário e análises ("como foi meu mês?")
+- [ ] Fase 7 — mundo comtay (jogo); antes, decidir de onde vem a arte
+- [x] Consertos 🔴/🟠 que não dependiam das contas (ver ACHADOS)

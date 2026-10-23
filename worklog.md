@@ -1,5 +1,12 @@
 # Worklog — Minha Vida 360 (Tayane)
 
+## 2026-10-23 · main · Brainstorm
+
+**O quê:** entrevista com a Tayane (negócio + decisões técnicas que dependem dela) antes de avançar · **Objetivo:** saber o que ela quer de verdade e destravar o SETUP
+**Feito:** `docs/ENTREVISTA-TAYANE.md` (7 partes, ~35 perguntas, ⭐ nas que travam); respostas dela condensadas em `docs/RESPOSTAS-TAYANE.md`; `docs/ROADMAP.md` reescrito pelas prioridades dela (nome **comtay**, domínio comtay.com.br provavelmente livre via RDAP, e-mail real + 2FA, backup diário, PWA Android, contas cadastráveis, 24 meses, extrato Santander, novo pet, lembretes 30/10 dias, Luísa integrada, Casa→Carro→Saúde, histórico/análises, mundo tipo jogo). Corrigido no CLAUDE.md: contracheque e saldo inicial já têm cadastro.
+**Riscos / quem afeta:** ela pulou 1.1–1.4 (contas, senha atual, dia da mudança, grátis/pago), então o SETUP segue travado; ela continua no Lovable com os bugs antigos até a mudança; Pix Automático não serve pra API de IA (só cartão); Claude Pro não paga a Luísa; a arte do mundo-jogo (personagem e cachorros fiéis) não tem origem nem custo definidos; escopo agora é de meses.
+**Próximo:** mandar pra ela a mensagem com as 4 perguntas que faltaram + pedir um extrato exportado do Santander. Enquanto isso dá pra adiantar o que não depende dela (renomear pra comtay, backup diário, PWA, região `gru1`, projeção de 24 meses).
+
 ## 2026-10-20 · main · Desenvolvimento
 
 **O quê:** arrumar o "OS" da Tayane feito no Lovable, fazer funcionar e pôr na Vercel com Supabase · **Objetivo:** app fora do Lovable, pronto pra deploy, com o mínimo de trabalho manual pro Bruno
