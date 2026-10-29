@@ -147,14 +147,16 @@ Cada área nova nasce com 3 coisas: a **tela**, o que a **Luísa** consegue regi
 2. **Saúde:** _"Crie a área Saúde no mesmo formato da Casa: atividades (academia, caminhada) com
    frequência por semana, consultas e exames com data, e histórico. A Luísa registra 'fui na
    academia hoje'."_
-3. **Lembretes no celular:** _"Quero notificação no celular 30 e 10 dias antes das vacinas e
+3. **Contas e cartões em Finanças:** _"Quero cadastrar, editar e excluir minhas contas e cartões,
+   com saldo inicial de cada uma."_
+4. **Lembretes no celular:** _"Quero notificação no celular 30 e 10 dias antes das vacinas e
    vermífugos dos meus filhos, e no dia das tarefas com data."_
-4. **"Luísa, como foi meu mês?":** _"Quero que a Luísa faça um resumo do mês de todas as áreas:
+5. **"Luísa, como foi meu mês?":** _"Quero que a Luísa faça um resumo do mês de todas as áreas:
    gastos, tarefas feitas, academia, cuidados dos filhos."_
-5. **Importar extrato do Santander:** manda um arquivo de exemplo exportado do app do banco e pede
+6. **Importar extrato do Santander:** manda um arquivo de exemplo exportado do app do banco e pede
    _"Quero importar esse extrato e conferir antes de salvar."_
-6. **Login com e-mail de verdade + código no celular** (pra recuperar a senha sozinha).
-7. **O mundo comtay (o jogo):** o mais trabalhoso. Antes de pedir código, decide de onde vem a arte
+7. **Login com e-mail de verdade + código no celular** (pra recuperar a senha sozinha).
+8. **O mundo comtay (o jogo):** o mais trabalhoso. Antes de pedir código, decide de onde vem a arte
    (ilustradora, IA ou personagem montável). Ver `docs/SUGESTOES.md` §3.
 
 ---
