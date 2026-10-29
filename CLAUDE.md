@@ -6,7 +6,7 @@ dominio: pessoal
 no_ar: não
 atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
-ultima_atividade: 2026-10-23
+ultima_atividade: 2026-10-29
 proxima_acao: "Tayane: responder 1.1–1.4 da entrevista (contas, senha, dia da mudança, grátis/pago) + mandar extrato Santander; depois SETUP"
 repo: git+remote
 tags: [pessoal, lovable-export, vercel, supabase]
