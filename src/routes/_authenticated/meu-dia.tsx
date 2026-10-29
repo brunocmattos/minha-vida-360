@@ -13,13 +13,14 @@ import { useEffect, useState } from "react";
 import { SectionCard, EmptyNote, SoftCard } from "@/components/cards";
 import { TaskChecklist } from "@/components/task-checklist";
 import { AREAS, TONE_BG, formatDateLong, greeting } from "@/lib/areas";
+import { pageTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/meu-dia")({
   head: () => ({
     meta: [
-      { title: "Meu Dia — Minha Vida 360" },
+      { title: pageTitle("Meu Dia") },
       { name: "description", content: "Tarefas e organização pessoal em seu espaço privado." },
-      { property: "og:title", content: "Meu Dia — Minha Vida 360" },
+      { property: "og:title", content: pageTitle("Meu Dia") },
       {
         property: "og:description",
         content: "Tarefas e organização pessoal em seu espaço privado.",

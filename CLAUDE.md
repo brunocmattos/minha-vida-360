@@ -6,8 +6,8 @@ dominio: pessoal
 no_ar: não
 atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
-ultima_atividade: 2026-10-23
-proxima_acao: "Tayane: responder 1.1–1.4 da entrevista (contas, senha, dia da mudança, grátis/pago) + mandar extrato Santander; depois SETUP"
+ultima_atividade: 2026-10-29
+proxima_acao: "Tayane: seguir docs/COMO-CONTINUAR.md (receber o repo, colocar no ar pelo SETUP, depois Carro e Saúde)"
 repo: git+remote
 tags: [pessoal, lovable-export, vercel, supabase]
 ---
@@ -15,6 +15,10 @@ tags: [pessoal, lovable-export, vercel, supabase]
 # comtay (ex-Minha Vida 360)
 
 ## Estado atual
+
+**2026-10-29 — projeto passado pra Tayane.** Ela continua com o Claude Code dela; guia passo a passo
+em [docs/COMO-CONTINUAR.md](docs/COMO-CONTINUAR.md). Quem decide produto é ela; siga a intenção dela em
+[docs/RESPOSTAS-TAYANE.md](docs/RESPOSTAS-TAYANE.md).
 
 **2026-10-23 — entrevista com a Tayane respondida** ([docs/RESPOSTAS-TAYANE.md](docs/RESPOSTAS-TAYANE.md)):
 o app passa a se chamar **comtay** (domínio pretendido comtay.com.br), a Luísa vira o centro (registrar
@@ -63,16 +67,21 @@ node scripts/local-supabase.mjs dev         # app em http://localhost:8080 apont
 
 - `src/routes/` — páginas (rotas por arquivo). `_authenticated/` exige login. `casa.tsx` é a home.
 - `src/components/` — módulos de tela: `finance-*.tsx`, `pets-module.tsx`, `task-checklist.tsx`,
-  `diary-module.tsx`, `luisa-chat.tsx`, `house-casa.tsx` (casa em SVG), `room-scene.tsx`.
+  `casa-module.tsx` (área Casa), `diary-module.tsx`, `luisa-chat.tsx`, `house-casa.tsx` (casa em SVG),
+  `room-scene.tsx`.
   `components/ui/` tem só `button` e `dialog` (shadcn; adicione outros com `npx shadcn add` se precisar).
 - `src/lib/` — regras de negócio puras e testadas (`finance.ts`, `finance-balances.ts`,
-  `recurrence.ts`, `pet-care.ts`, `luisa.ts`), `areas.ts` (as 12 áreas da vida) e `fetch-all.ts`.
+  `recurrence.ts`, `pet-care.ts`, `payslip.ts`, `casa.ts`, `luisa.ts`), `areas.ts` (as 12 áreas da
+  vida) e `fetch-all.ts`.
 - `src/lib/luisa.functions.ts` — **única** função de servidor (chamada de IA + gravação confirmada).
 - `src/styles.css` — cores e tema (tokens OKLCH), paleta da casa, tema por cômodo.
 - `src/assets/pets/` — ilustrações dos pets.
-- `drizzle/migrations/` — esquema do banco (17 tabelas, todas com RLS por `owner_id`). Fonte da verdade do schema.
+- `drizzle/migrations/` — esquema do banco (19 tabelas, todas com RLS por `owner_id`). Fonte da verdade do schema.
 - `scripts/` — `local-supabase.mjs` (dev local), `export-data.mjs` / `import-data.mjs` (mudar de banco).
-- `.github/workflows/backup.yml` — backup do banco a cada 3 dias (precisa do segredo `DATABASE_URL`).
+- `.github/workflows/backup.yml` — backup diário do banco (precisa do segredo `DATABASE_URL`).
+- `src/lib/brand.ts` — nome do app (`APP_NAME`), títulos de página e o domínio do login por nome.
+- `public/manifest.webmanifest`, `public/sw.js`, `public/icons/` — app instalável (PWA). O service worker
+  não guarda cache de dados, só mostra o aviso de "sem internet".
 - `src/test/` — testes Vitest.
 
 ### Quando quem pede a mudança é a Tayane
@@ -90,7 +99,8 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 
 ## Ambiente & acessos
 
-- Repositório: https://github.com/brunooutcore/minha-vida-360 (privado, branch `main`).
+- Repositório: `minha-vida-360` (privado, branch `main`). Hoje em `brunocmattos`, a ser transferido pra
+  conta da Tayane. Cópia com o histórico inteiro do antigo `brunooutcore/minha-vida-360`, que não é mais usado.
 - Variáveis do app (Vercel / `.env`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
   `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; Luísa: `LLM_API_KEY` (+ opcionais `LLM_BASE_URL`,
   padrão `https://api.deepseek.com`, e `LLM_MODEL`, padrão `deepseek-flash`).
@@ -120,8 +130,13 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 - **Toda área nova nasce com 3 peças**: tela + ações da Luísa ("propõe → confirma") + histórico.
 - **Fotos ficam em `public/images/`**: trocar o arquivo mantendo o nome troca a foto no app.
 - `AGENTS.md` tem as decisões de design de domínio; `roadmap.md` é o histórico do Lovable.
-- npm trava na máquina do Bruno por `cafile` do Kaspersky no `~/.npmrc` (`UNABLE_TO_GET_ISSUER_CERT_LOCALLY`);
-  use bun com `--cafile=<bundle com os CAs do Node + o do Kaspersky>`.
+- **Sessões na nuvem (Claude Code web):** não há `.env` de propósito (nada aponta pro banco real). O Docker
+  não liga sozinho: rode `dockerd &` antes do `npx supabase start`. As imagens vêm do Docker Hub depois de
+  algumas tentativas falhas no ECR/ghcr (normal, demora uns minutos). Postgres remoto (portas 5432/6543)
+  não sai do container: migrations e import no banco de verdade rodam no PC ou numa Action.
+- `bun.lock` aponta pro registro público do npm. O export do Lovable apontava pro cache privado dele
+  (`*-npm.pkg.dev/lovable-core-prod`), que pode sumir; não deixar voltar.
+- Na máquina do Bruno (Windows), o `~/.npmrc` tem `cafile` do Kaspersky; isso não vale na nuvem.
 
 ## Backlog
 

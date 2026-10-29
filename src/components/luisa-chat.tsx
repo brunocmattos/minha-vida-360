@@ -167,6 +167,8 @@ export function LuisaChat() {
       if (approved) {
         void qc.invalidateQueries({ queryKey: ["fin"] });
         void qc.invalidateQueries({ queryKey: ["diary"] });
+        void qc.invalidateQueries({ queryKey: ["tasks"] });
+        void qc.invalidateQueries({ queryKey: ["casa-shopping"] });
       }
       if (activeId) await loadMessages(activeId);
     } catch (e) {

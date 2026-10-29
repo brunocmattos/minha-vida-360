@@ -18,3 +18,17 @@ export function careStatus(care: CareDates, today: string) {
 export function careScheduleDate(care: CareDates) {
   return pendingRegularization(care) ? care.overdue_since : care.next_date;
 }
+
+/** Identificador do pet novo (usado nas ilustrações e na ordem): "Pé de Moleque" → "pe-de-moleque". */
+export function petSlug(name: string, taken: string[]) {
+  const base =
+    name
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "pet";
+  let slug = base;
+  for (let n = 2; taken.includes(slug); n++) slug = `${base}-${n}`;
+  return slug;
+}

@@ -31,12 +31,12 @@ grátis ou pago). Sem isso o SETUP não anda.
 - [ ] Contas (GitHub, Vercel, Supabase) e dia da mudança: perguntas 1.1–1.4
 - [ ] Export → Supabase novo → import → Vercel ([SETUP.md](SETUP.md) passos 1–5)
 - [ ] Domínio **comtay.com.br** no registro.br (~R$ 40/ano, aceita Pix) apontado pra Vercel
-- [ ] Renomear tudo para **comtay** (o nome "Minha Vida 360" está repetido em 13 arquivos; virar constante única)
+- [x] Renomear tudo para **comtay** (constante única em `src/lib/brand.ts`; o login por nome segue `@minhavida360.app` até virar e-mail real)
 - [ ] Login por **e-mail real** + "esqueci a senha" (precisa de SMTP próprio, ex.: Resend no domínio
       comtay.com.br; o e-mail padrão do Supabase é limitado demais)
 - [ ] **2FA** por app autenticador (TOTP, grátis no Supabase; código por SMS teria custo)
-- [ ] **Backup diário** (hoje o cron roda a cada 3 dias: `.github/workflows/backup.yml`)
-- [ ] **PWA instalável** no Android (ícone, tela cheia); funções da Vercel na região `gru1` (perto do banco)
+- [x] **Backup diário** (`.github/workflows/backup.yml`, 03:17 de Brasília)
+- [x] **PWA instalável** no Android (ícone, tela cheia, aviso offline); funções da Vercel na região `gru1`
 - [ ] Ela usa por alguns dias e lista o que ainda **não salva / não aparece no celular** na versão nova
 
 ## Fase 1b — Ela mexer pelo celular
@@ -54,14 +54,15 @@ grátis ou pago). Sem isso o SETUP não anda.
 - [ ] **Contas e cartões cadastráveis** (hoje são 4 carteiras fixas no código: `Account` em
       `lib/finance-balances.ts`). Precisa de tabela nova + migration
 - [ ] Saldo inicial por conta: **já existe** (`fin_openings` em `finance-wallets.tsx`). Estender às contas novas
-- [ ] Projeção de recorrentes em **24 meses** (hoje `horizon = 12` / `months = 12` em `lib/finance.ts`)
-- [ ] Contracheque: o cadastro/edição **já existe** (`finance-extra.tsx`). Falta a **comparação entre meses**
+- [x] Projeção de recorrentes em **24 meses** (`PROJECTION_MONTHS` em `lib/finance.ts`)
+- [x] Contracheque: aba própria em Receitas, contracheque novo, linhas editáveis, **comparação entre meses**
+      e o que mudou linha a linha (`lib/payslip.ts`)
 - [ ] **Importar extrato do Santander** com revisão antes de salvar (pedir a ela um arquivo exemplo: OFX/CSV/Excel?)
 - [ ] Joici até nov/2026: já feito no Lovable. Conferir que dez/2026 em diante fica 100% dela
 
 **Filhos**
 
-- [ ] **Cadastrar pet novo** (hoje a tela só edita `pet_profiles`)
+- [x] **Cadastrar pet novo** ("Adicionar filho" em Meus Filhos)
 - [ ] Trocar foto: o campo já existe no perfil. Conferir se ela acha e consegue usar
 - [ ] **Lembretes 30 e 10 dias antes**: push no Android (Web Push via PWA) + e-mail, numa rotina diária
 
@@ -73,15 +74,17 @@ grátis ou pago). Sem isso o SETUP não anda.
 
 - [ ] Trocar o provedor para **Claude ou GPT** (ela deixou a escolha conosco; o código já aceita qualquer
       provedor compatível). Pagamento: as APIs cobram em cartão, não em Pix (ver nota abaixo)
-- [ ] Ações por área no padrão existente (`luisa.functions.ts`): registrar cuidado de pet + gasto junto,
-      concluir tarefa, item na lista de compras, atividade de saúde, lembrete com data
+- [x] Ações da Casa no padrão existente (`luisa.functions.ts`): **tarefa/lembrete com data**, **tarefa feita**
+      (conclui a rotina certa pelo id ou registra como feito) e **itens na lista de compras**
+- [ ] Demais ações: registrar cuidado de pet + gasto junto, atividade de saúde
 - [ ] Leitura de **todas** as áreas (ela autorizou, inclusive diário, saúde e espiritualidade)
 - [ ] Validar com conversas reais e medir o custo por mês
 
 ## Fase 4 — Novas áreas: Casa → Carro → Saúde
 
-- [ ] **Casa**: tarefas e rotinas de limpeza com frequência, lista de compras, manutenções/serviços,
-      lembretes, histórico (RESPOSTAS 5.2)
+- [x] **Casa** (`casa-module.tsx`, `lib/casa.ts`, migration 0011): tarefas e rotinas com constância
+      (vezes em 30 dias, última vez), lista de compras (vários itens de uma vez), manutenções/serviços,
+      histórico de 30 dias. Lembretes = tarefa com data (notificação no celular ainda não)
 - [ ] **Meu Carro**: manutenções, documentação (IPVA, licenciamento), lembretes
 - [ ] **Saúde**: atividades (academia + frequência), consultas, exames
 

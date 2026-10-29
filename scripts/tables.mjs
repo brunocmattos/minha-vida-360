@@ -15,6 +15,8 @@ export const TABLES = [
   "tasks",
   "task_completions",
   "diary_entries",
+  "shopping_items",
+  "home_maintenance",
   "luisa_conversations",
   "luisa_messages",
 ];
@@ -24,4 +26,4 @@ export const toEmail = (u) =>
   `${u
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`;
+    .replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`; // = LOGIN_EMAIL_DOMAIN em src/lib/brand.ts

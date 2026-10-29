@@ -2,16 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HouseCasa } from "@/components/house-casa";
 import { formatDateLong, greeting } from "@/lib/areas";
 import { useEffect, useState } from "react";
+import { pageTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/casa")({
   head: () => ({
     meta: [
-      { title: "Minha Casa — Minha Vida 360" },
+      { title: pageTitle("Minha Casa") },
       {
         name: "description",
         content: "Sua casa em corte transversal: cada cômodo abre uma área da sua vida.",
       },
-      { property: "og:title", content: "Minha Casa — Minha Vida 360" },
+      { property: "og:title", content: pageTitle("Minha Casa") },
       {
         property: "og:description",
         content: "Sua casa em corte transversal: cada cômodo abre uma área da sua vida.",

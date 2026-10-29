@@ -1,15 +1,16 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Minha Vida 360" },
+      { title: APP_NAME },
       {
         name: "description",
         content: "Organização pessoal acolhedora: tarefas, finanças, saúde, casa e muito mais.",
       },
-      { property: "og:title", content: "Minha Vida 360" },
+      { property: "og:title", content: APP_NAME },
       {
         property: "og:description",
         content: "Organização pessoal acolhedora para todas as áreas da vida.",

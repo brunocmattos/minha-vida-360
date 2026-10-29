@@ -18,6 +18,7 @@ export type Database = {
           owner_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           area_slug?: string | null;
           content: string;
@@ -46,6 +47,7 @@ export type Database = {
           name: string;
           owner_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -74,6 +76,7 @@ export type Database = {
           source: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           amount: number;
           created_at?: string;
@@ -124,6 +127,7 @@ export type Database = {
           updated_at: string;
           wallet: string;
         };
+        ComputedFields: never;
         Insert: {
           amount_manual?: boolean;
           amount_paid?: number;
@@ -204,6 +208,7 @@ export type Database = {
           owner_id: string;
           wallet: string;
         };
+        ComputedFields: never;
         Insert: {
           changed_at?: string;
           competence: string;
@@ -242,6 +247,7 @@ export type Database = {
           updated_at: string;
           wallet: string;
         };
+        ComputedFields: never;
         Insert: {
           amount: number;
           competence: string;
@@ -270,8 +276,8 @@ export type Database = {
         Row: {
           competence: string;
           created_at: string;
-          deductions: Json;
-          earnings: Json;
+          deductions: NonNullable<Json>;
+          earnings: NonNullable<Json>;
           employer: string;
           id: string;
           notes: string | null;
@@ -279,11 +285,12 @@ export type Database = {
           paid_month: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           competence: string;
           created_at?: string;
-          deductions?: Json;
-          earnings?: Json;
+          deductions?: NonNullable<Json>;
+          earnings?: NonNullable<Json>;
           employer: string;
           id?: string;
           notes?: string | null;
@@ -294,8 +301,8 @@ export type Database = {
         Update: {
           competence?: string;
           created_at?: string;
-          deductions?: Json;
-          earnings?: Json;
+          deductions?: NonNullable<Json>;
+          earnings?: NonNullable<Json>;
           employer?: string;
           id?: string;
           notes?: string | null;
@@ -330,6 +337,7 @@ export type Database = {
           start_month: string;
           wallet: string;
         };
+        ComputedFields: never;
         Insert: {
           active?: boolean;
           amount_planned: number;
@@ -399,6 +407,7 @@ export type Database = {
           target_date: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           allocated_amount?: number | null;
           created_at?: string;
@@ -432,6 +441,7 @@ export type Database = {
           to_wallet: string;
           transfer_date: string;
         };
+        ComputedFields: never;
         Insert: {
           amount: number;
           created_at?: string;
@@ -454,6 +464,49 @@ export type Database = {
         };
         Relationships: [];
       };
+      home_maintenance: {
+        Row: {
+          cost: number | null;
+          created_at: string;
+          done_date: string | null;
+          id: string;
+          kind: string;
+          notes: string | null;
+          owner_id: string;
+          provider: string | null;
+          scheduled_date: string | null;
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          cost?: number | null;
+          created_at?: string;
+          done_date?: string | null;
+          id?: string;
+          kind?: string;
+          notes?: string | null;
+          owner_id?: string;
+          provider?: string | null;
+          scheduled_date?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          cost?: number | null;
+          created_at?: string;
+          done_date?: string | null;
+          id?: string;
+          kind?: string;
+          notes?: string | null;
+          owner_id?: string;
+          provider?: string | null;
+          scheduled_date?: string | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       luisa_conversations: {
         Row: {
           created_at: string;
@@ -462,6 +515,7 @@ export type Database = {
           title: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -488,6 +542,7 @@ export type Database = {
           owner_id: string;
           role: string;
         };
+        ComputedFields: never;
         Insert: {
           action?: Json | null;
           content: string;
@@ -531,6 +586,7 @@ export type Database = {
           title: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           done_date?: string | null;
@@ -581,6 +637,7 @@ export type Database = {
           role: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           address?: string | null;
           created_at?: string;
@@ -618,6 +675,7 @@ export type Database = {
           updated_at: string;
           weight_kg: number | null;
         };
+        ComputedFields: never;
         Insert: {
           birth_date?: string | null;
           created_at?: string;
@@ -644,6 +702,37 @@ export type Database = {
         };
         Relationships: [];
       };
+      shopping_items: {
+        Row: {
+          bought_at: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          owner_id: string;
+          quantity: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          bought_at?: string | null;
+          created_at?: string;
+          id?: string;
+          name: string;
+          owner_id?: string;
+          quantity?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          bought_at?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          quantity?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       task_completions: {
         Row: {
           completed_at: string;
@@ -652,6 +741,7 @@ export type Database = {
           owner_id: string;
           task_id: string;
         };
+        ComputedFields: never;
         Insert: {
           completed_at?: string;
           due_date?: string | null;
@@ -690,6 +780,7 @@ export type Database = {
           title: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           area_slug?: string | null;
           completed_at?: string | null;
@@ -751,9 +842,7 @@ export type Tables<
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R;
@@ -776,9 +865,7 @@ export type TablesInsert<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I;
     }
@@ -800,9 +887,7 @@ export type TablesUpdate<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U;
     }
@@ -824,9 +909,7 @@ export type Enums<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never) = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
@@ -840,9 +923,7 @@ export type CompositeTypes<
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never) = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]

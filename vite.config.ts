@@ -21,6 +21,8 @@ export default defineConfig(({ command }) => ({
       ? [
           nitro({
             preset: process.env["NITRO_PRESET"] || "vercel",
+            // Funções em São Paulo, perto do banco (Supabase em São Paulo, SETUP passo 2) e dela.
+            vercel: { functions: { regions: ["gru1"] } },
             routeRules: {
               "/**": {
                 headers: {

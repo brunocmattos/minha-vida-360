@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FinanceModule } from "@/components/finance-module";
+import { pageTitle } from "@/lib/brand";
 export const Route = createFileRoute("/_authenticated/area/financas/despesas")({
   head: () => ({
     meta: [
-      { title: "Despesas — Minha Vida 360" },
+      { title: pageTitle("Despesas") },
       { name: "description", content: "Despesas no seu espaço financeiro privado." },
-      { property: "og:title", content: "Despesas — Minha Vida 360" },
+      { property: "og:title", content: pageTitle("Despesas") },
       { property: "og:description", content: "Organização financeira pessoal privada: Despesas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
