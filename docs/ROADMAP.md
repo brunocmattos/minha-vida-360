@@ -31,12 +31,12 @@ grátis ou pago). Sem isso o SETUP não anda.
 - [ ] Contas (GitHub, Vercel, Supabase) e dia da mudança: perguntas 1.1–1.4
 - [ ] Export → Supabase novo → import → Vercel ([SETUP.md](SETUP.md) passos 1–5)
 - [ ] Domínio **comtay.com.br** no registro.br (~R$ 40/ano, aceita Pix) apontado pra Vercel
-- [ ] Renomear tudo para **comtay** (o nome "Minha Vida 360" está repetido em 13 arquivos; virar constante única)
+- [x] Renomear tudo para **comtay** (constante única em `src/lib/brand.ts`; o login por nome segue `@minhavida360.app` até virar e-mail real)
 - [ ] Login por **e-mail real** + "esqueci a senha" (precisa de SMTP próprio, ex.: Resend no domínio
       comtay.com.br; o e-mail padrão do Supabase é limitado demais)
 - [ ] **2FA** por app autenticador (TOTP, grátis no Supabase; código por SMS teria custo)
-- [ ] **Backup diário** (hoje o cron roda a cada 3 dias: `.github/workflows/backup.yml`)
-- [ ] **PWA instalável** no Android (ícone, tela cheia); funções da Vercel na região `gru1` (perto do banco)
+- [x] **Backup diário** (`.github/workflows/backup.yml`, 03:17 de Brasília)
+- [x] **PWA instalável** no Android (ícone, tela cheia, aviso offline); funções da Vercel na região `gru1`
 - [ ] Ela usa por alguns dias e lista o que ainda **não salva / não aparece no celular** na versão nova
 
 ## Fase 1b — Ela mexer pelo celular
@@ -54,7 +54,7 @@ grátis ou pago). Sem isso o SETUP não anda.
 - [ ] **Contas e cartões cadastráveis** (hoje são 4 carteiras fixas no código: `Account` em
       `lib/finance-balances.ts`). Precisa de tabela nova + migration
 - [ ] Saldo inicial por conta: **já existe** (`fin_openings` em `finance-wallets.tsx`). Estender às contas novas
-- [ ] Projeção de recorrentes em **24 meses** (hoje `horizon = 12` / `months = 12` em `lib/finance.ts`)
+- [x] Projeção de recorrentes em **24 meses** (`PROJECTION_MONTHS` em `lib/finance.ts`)
 - [ ] Contracheque: o cadastro/edição **já existe** (`finance-extra.tsx`). Falta a **comparação entre meses**
 - [ ] **Importar extrato do Santander** com revisão antes de salvar (pedir a ela um arquivo exemplo: OFX/CSV/Excel?)
 - [ ] Joici até nov/2026: já feito no Lovable. Conferir que dez/2026 em diante fica 100% dela

@@ -36,6 +36,7 @@ import {
   monthOf,
   parseBRL,
   projection,
+  PROJECTION_MONTHS,
   recurrenceOccurrences,
   NATURE_LABEL,
   halfHousingUpdates,
@@ -318,8 +319,8 @@ export function FinanceModule({
                 ["/area/financas/dividas", "Dívidas", "SPC/Serasa", ShieldCheck],
                 [
                   "/area/financas/planejamento",
-                  "Planejamento anual",
-                  "12 meses e metas",
+                  "Planejamento",
+                  `${PROJECTION_MONTHS} meses e metas`,
                   CalendarRange,
                 ],
               ] as const
@@ -396,7 +397,9 @@ export function FinanceModule({
       {page === "planejamento" && (
         <>
           <section>
-            <h2 className="mb-3 text-base font-semibold">Planejamento anual · 12 meses</h2>
+            <h2 className="mb-3 text-base font-semibold">
+              Planejamento · {PROJECTION_MONTHS} meses
+            </h2>
             <p className="mb-3 text-xs text-muted-foreground">
               Resultado previsto sem saldo de abertura. Benefícios, transferências, consignados e
               SPC/Serasa não entram no resultado bancário.
@@ -697,7 +700,7 @@ function EntryForm({
       </div>
       <label className="mt-3 flex items-center gap-2 text-sm">
         <input type="checkbox" checked={rec} onChange={(e) => setRec(e.target.checked)} />{" "}
-        <Repeat className="size-4" /> Repetir todo mês (gera os próximos 12 meses)
+        <Repeat className="size-4" /> Repetir todo mês (gera os próximos {PROJECTION_MONTHS} meses)
       </label>
       {err && (
         <p role="alert" className="mt-2 text-sm text-destructive">

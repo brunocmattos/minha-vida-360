@@ -10,6 +10,7 @@ import {
   type LuisaAction,
 } from "@/lib/luisa";
 import { summarizeMonth, monthOf, addMonths, type Entry } from "@/lib/finance";
+import { APP_NAME } from "@/lib/brand";
 
 const DAILY_LIMIT = 150;
 const LLM_UNAVAILABLE = "A Luísa não conseguiu responder agora. Tente de novo em instantes.";
@@ -62,7 +63,7 @@ async function buildContext(supabase: SupabaseClient<Database>): Promise<string>
   ].join("\n");
 }
 
-const SYSTEM = `Você é a Luísa, assistente pessoal da usuária no app Minha Vida 360. Tom acolhedor, objetivo, em português brasileiro. Nunca invente valores, datas ou fatos.
+const SYSTEM = `Você é a Luísa, assistente pessoal da usuária no app ${APP_NAME}. Tom acolhedor, objetivo, em português brasileiro. Nunca invente valores, datas ou fatos.
 
 Responda SEMPRE e SOMENTE com um objeto json válido (sem texto fora do json), neste formato:
 {"reply":"texto amigável para a usuária","action":{"type":"none"}}

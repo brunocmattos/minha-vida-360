@@ -7,6 +7,8 @@ import {
   summarizeMonth,
   dueInMonth,
   type Entry,
+  PROJECTION_MONTHS,
+  projection,
 } from "@/lib/finance";
 
 const base: Entry = {
@@ -106,12 +108,12 @@ describe("finanças", () => {
       },
       "2026-10-01",
     );
-    expect(rows).toHaveLength(12);
+    expect(rows).toHaveLength(24);
     expect(rows.every((r) => r.nature === "anual" && r.category_id === "category")).toBe(true);
   });
   it("vencimento dia 31 respeita fim de fevereiro", () =>
     expect(dueInMonth("2026-02-01", 31)).toBe("2026-02-28"));
-  it("recorrência gera uma ocorrência por competência em 12 meses", () => {
+  it("recorrência gera uma ocorrência por competência em 24 meses", () => {
     const rows = recurrenceOccurrences(
       {
         id: "r",
@@ -126,8 +128,8 @@ describe("finanças", () => {
       },
       "2026-10-01",
     );
-    expect(rows).toHaveLength(12);
-    expect(new Set(rows.map((r) => r.competence)).size).toBe(12);
+    expect(rows).toHaveLength(24);
+    expect(new Set(rows.map((r) => r.competence)).size).toBe(24);
   });
 });
 
@@ -190,5 +192,15 @@ describe("modelo real", () => {
     expect(s.plannedIn).toBe(0);
     expect(s.cash).toBe(0);
     expect(s.benefitReceived).toBe(600);
+  });
+});
+
+describe("horizonte de 24 meses", () => {
+  it("projeção mostra 24 meses por padrão, a partir do mês pedido", () => {
+    const p = projection([], "2026-11-01");
+    expect(PROJECTION_MONTHS).toBe(24);
+    expect(p).toHaveLength(24);
+    expect(p[0]?.month).toBe("2026-11-01");
+    expect(p[23]?.month).toBe("2028-10-01");
   });
 });

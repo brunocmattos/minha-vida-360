@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LuisaChat } from "@/components/luisa-chat";
 import { cn } from "@/lib/utils";
+import { APP_MARK, APP_NAME } from "@/lib/brand";
 
 const itemCls =
   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
@@ -55,9 +56,9 @@ function Brand() {
   return (
     <Link to="/casa" className="flex min-w-0 items-center gap-2">
       <span className="grid size-9 place-items-center rounded-md bg-secondary font-display text-base font-bold text-primary">
-        360
+        {APP_MARK}
       </span>
-      <span className="font-display text-lg font-semibold">Minha Vida 360</span>
+      <span className="font-display text-lg font-semibold">{APP_NAME}</span>
     </Link>
   );
 }

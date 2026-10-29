@@ -7,6 +7,7 @@ import { FinanceModule } from "@/components/finance-module";
 import { PetsModule } from "@/components/pets-module";
 import { DiaryModule } from "@/components/diary-module";
 import { RoomScene, roomFor } from "@/components/room-scene";
+import { pageTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/area/$slug")({
   validateSearch: (s: Record<string, unknown>): { comodo?: string } =>
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/area/$slug")({
   },
   head: ({ loaderData }) => {
     const a = loaderData ? getArea(loaderData.slug) : undefined;
-    const title = a ? `${a.name} — Minha Vida 360` : "Área — Minha Vida 360";
+    const title = a ? pageTitle(a.name) : pageTitle("Área");
     const description = a?.description ?? "Seu espaço privado de organização pessoal.";
     return {
       meta: [

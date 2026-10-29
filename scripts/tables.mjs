@@ -24,4 +24,4 @@ export const toEmail = (u) =>
   `${u
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`;
+    .replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`; // = LOGIN_EMAIL_DOMAIN em src/lib/brand.ts

@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FinanceModule } from "@/components/finance-module";
+import { pageTitle } from "@/lib/brand";
 export const Route = createFileRoute("/_authenticated/area/financas/dividas")({
   head: () => ({
     meta: [
-      { title: "Dívidas · SPC/Serasa — Minha Vida 360" },
+      { title: pageTitle("Dívidas · SPC/Serasa") },
       { name: "description", content: "Dívidas · SPC/Serasa no seu espaço financeiro privado." },
-      { property: "og:title", content: "Dívidas · SPC/Serasa — Minha Vida 360" },
+      { property: "og:title", content: pageTitle("Dívidas · SPC/Serasa") },
       {
         property: "og:description",
         content: "Organização financeira pessoal privada: Dívidas · SPC/Serasa.",

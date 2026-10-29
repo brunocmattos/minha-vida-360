@@ -72,7 +72,10 @@ node scripts/local-supabase.mjs dev         # app em http://localhost:8080 apont
 - `src/assets/pets/` — ilustrações dos pets.
 - `drizzle/migrations/` — esquema do banco (17 tabelas, todas com RLS por `owner_id`). Fonte da verdade do schema.
 - `scripts/` — `local-supabase.mjs` (dev local), `export-data.mjs` / `import-data.mjs` (mudar de banco).
-- `.github/workflows/backup.yml` — backup do banco a cada 3 dias (precisa do segredo `DATABASE_URL`).
+- `.github/workflows/backup.yml` — backup diário do banco (precisa do segredo `DATABASE_URL`).
+- `src/lib/brand.ts` — nome do app (`APP_NAME`), títulos de página e o domínio do login por nome.
+- `public/manifest.webmanifest`, `public/sw.js`, `public/icons/` — app instalável (PWA). O service worker
+  não guarda cache de dados, só mostra o aviso de "sem internet".
 - `src/test/` — testes Vitest.
 
 ### Quando quem pede a mudança é a Tayane
@@ -90,7 +93,8 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 
 ## Ambiente & acessos
 
-- Repositório: https://github.com/brunooutcore/minha-vida-360 (privado, branch `main`).
+- Repositório: https://github.com/brunocmattos/minha-vida-360 (privado, branch `main`). Cópia com o
+  histórico inteiro do antigo `brunooutcore/minha-vida-360` (conta de trabalho), que não é mais usado.
 - Variáveis do app (Vercel / `.env`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
   `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; Luísa: `LLM_API_KEY` (+ opcionais `LLM_BASE_URL`,
   padrão `https://api.deepseek.com`, e `LLM_MODEL`, padrão `deepseek-flash`).
@@ -120,8 +124,13 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 - **Toda área nova nasce com 3 peças**: tela + ações da Luísa ("propõe → confirma") + histórico.
 - **Fotos ficam em `public/images/`**: trocar o arquivo mantendo o nome troca a foto no app.
 - `AGENTS.md` tem as decisões de design de domínio; `roadmap.md` é o histórico do Lovable.
-- npm trava na máquina do Bruno por `cafile` do Kaspersky no `~/.npmrc` (`UNABLE_TO_GET_ISSUER_CERT_LOCALLY`);
-  use bun com `--cafile=<bundle com os CAs do Node + o do Kaspersky>`.
+- **Sessões na nuvem (Claude Code web):** não há `.env` de propósito (nada aponta pro banco real). O Docker
+  não liga sozinho: rode `dockerd &` antes do `npx supabase start`. As imagens vêm do Docker Hub depois de
+  algumas tentativas falhas no ECR/ghcr (normal, demora uns minutos). Postgres remoto (portas 5432/6543)
+  não sai do container: migrations e import no banco de verdade rodam no PC ou numa Action.
+- `bun.lock` aponta pro registro público do npm. O export do Lovable apontava pro cache privado dele
+  (`*-npm.pkg.dev/lovable-core-prod`), que pode sumir; não deixar voltar.
+- Na máquina do Bruno (Windows), o `~/.npmrc` tem `cafile` do Kaspersky; isso não vale na nuvem.
 
 ## Backlog
 

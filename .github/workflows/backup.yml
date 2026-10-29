@@ -1,4 +1,4 @@
-# Backup do banco a cada 3 dias (e manual pelo botão "Run workflow").
+# Backup diário do banco (e manual pelo botão "Run workflow").
 # Também conta como uso, o que evita o Supabase gratuito pausar o projeto por inatividade.
 # Precisa do segredo DATABASE_URL no repositório (Settings > Secrets and variables > Actions):
 # a connection string "Session pooler" do Supabase.
@@ -7,7 +7,7 @@ name: backup
 
 on:
   schedule:
-    - cron: "17 6 */3 * *"
+    - cron: "17 6 * * *" # 03:17 em Brasília
   workflow_dispatch:
 
 jobs:
@@ -15,6 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Antes de instalar qualquer coisa: sem o segredo a rotina falha de propósito (aviso de que não há backup).
+      - name: Conferir o segredo DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: test -n "$DATABASE_URL" || { echo "Falta o segredo DATABASE_URL"; exit 1; }
+
       - name: Instalar pg_dump 17 (mesma versão do Supabase)
         run: |
           sudo install -d /usr/share/postgresql-common/pgdg
@@ -28,10 +34,9 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          test -n "$DATABASE_URL" || { echo "Falta o segredo DATABASE_URL"; exit 1; }
           /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
             --schema=public --no-owner --no-privileges \
-            --format=custom --file="minha-vida-360-$(date +%F).dump"
+            --format=custom --file="comtay-$(date +%F).dump"
           ls -lh *.dump
           /usr/lib/postgresql/17/bin/pg_restore -l *.dump | grep -c "TABLE DATA public" | xargs -I{} sh -c 'test {} -ge 17 || { echo "Backup incompleto: {} tabelas"; exit 1; }'
 

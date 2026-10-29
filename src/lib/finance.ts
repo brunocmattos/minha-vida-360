@@ -163,8 +163,15 @@ export function entryStatus(
   return "pendente";
 }
 
+/** Meses à frente que as recorrências geram e a projeção mostra (pedido da Tayane: 24). */
+export const PROJECTION_MONTHS = 24;
+
 /** Ocorrências de uma recorrência mensal entre o início e (mês atual + horizonte-1). Uma por competência. */
-export function recurrenceOccurrences(r: Recurrence, currentMonth: string, horizon = 12) {
+export function recurrenceOccurrences(
+  r: Recurrence,
+  currentMonth: string,
+  horizon = PROJECTION_MONTHS,
+) {
   if (!r.active || r.frequency === "periodica") return [];
   const until = addMonths(currentMonth, horizon - 1);
   const stop = r.end_month && r.end_month < until ? r.end_month : until;
@@ -235,7 +242,7 @@ export function summarizeMonth(entries: Entry[], month: string): MonthSummary {
   };
 }
 
-export function projection(entries: Entry[], fromMonth: string, months = 12) {
+export function projection(entries: Entry[], fromMonth: string, months = PROJECTION_MONTHS) {
   return Array.from({ length: months }, (_, i) => {
     const m = addMonths(fromMonth, i);
     const s = summarizeMonth(entries, m);

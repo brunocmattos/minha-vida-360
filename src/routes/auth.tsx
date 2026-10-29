@@ -2,14 +2,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { APP_MARK, APP_NAME, LOGIN_EMAIL_DOMAIN, pageTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — Minha Vida 360" },
-      { name: "description", content: "Acesse seu espaço privado no Minha Vida 360." },
-      { property: "og:title", content: "Entrar — Minha Vida 360" },
-      { property: "og:description", content: "Acesse seu espaço privado no Minha Vida 360." },
+      { title: pageTitle("Entrar") },
+      { name: "description", content: `Acesse seu espaço privado no ${APP_NAME}.` },
+      { property: "og:title", content: pageTitle("Entrar") },
+      { property: "og:description", content: `Acesse seu espaço privado no ${APP_NAME}.` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -25,7 +26,7 @@ export function usernameToEmail(username: string) {
   return `${username
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "")}@minhavida360.app`;
+    .replace(/[^a-z0-9._-]/g, "")}@${LOGIN_EMAIL_DOMAIN}`;
 }
 
 function AuthPage() {
@@ -59,9 +60,9 @@ function AuthPage() {
       <div className="w-full max-w-sm rounded-lg border bg-card p-7 shadow-lift">
         <div className="mb-6 text-center">
           <span className="mx-auto mb-3 grid size-12 place-items-center rounded-md bg-secondary font-display text-lg font-bold text-primary">
-            360
+            {APP_MARK}
           </span>
-          <h1 className="text-2xl font-semibold">Minha Vida 360</h1>
+          <h1 className="text-2xl font-semibold">{APP_NAME}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Seu espaço acolhedor para organizar a vida.
           </p>
