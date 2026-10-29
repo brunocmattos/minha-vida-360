@@ -364,6 +364,14 @@ export function FinanceModule({
             >
               Recorrências e categorias
             </Button>
+            {page === "receitas" && (
+              <Button
+                variant={tab === "payslip" ? "secondary" : "ghost"}
+                onClick={() => setTab(tab === "payslip" ? "entries" : "payslip")}
+              >
+                Contracheques
+              </Button>
+            )}
             {page === "despesas" && (
               <Button
                 variant={tab === "proj" ? "secondary" : "ghost"}
@@ -384,6 +392,7 @@ export function FinanceModule({
               categoryView={(es) => <ByCategory entries={es} catName={catName} />}
             />
           )}
+          {page === "receitas" && tab === "payslip" && <Payslips />}
           {tab === "calendar" && (
             <CalendarFlow
               entries={data.entries.filter(
@@ -924,7 +933,7 @@ function EntryRow({
           </Dialog>
           <Dialog open={slip} onOpenChange={setSlip}>
             <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
-              <DialogTitle>Contracheque Guarida</DialogTitle>
+              <DialogTitle>Contracheques</DialogTitle>
               <DialogDescription>Detalhamento separado do caixa</DialogDescription>
               <Payslips />
             </DialogContent>

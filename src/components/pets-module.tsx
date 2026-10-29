@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { SoftCard, EmptyNote } from "@/components/cards";
 import { confirmDelete, confirmDiscard } from "@/components/back-button";
 import { formatBRL } from "@/lib/finance";
-import { careStatus, careScheduleDate } from "@/lib/pet-care";
+import { careStatus, careScheduleDate, petSlug } from "@/lib/pet-care";
 import dobbyIllustration from "@/assets/pets/dobby.png";
 import pacoIllustration from "@/assets/pets/paco.png";
 import zaraIllustration from "@/assets/pets/zara.png";
@@ -151,6 +151,7 @@ export function PetsModule() {
   const qc = useQueryClient();
   const [careOpen, setCareOpen] = useState(false);
   const [openPetId, setOpenPetId] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
   const pets = useQuery({
     queryKey: ["pets"],
     queryFn: async () => {
@@ -284,12 +285,15 @@ export function PetsModule() {
             <h1 className="font-display text-4xl font-bold text-[var(--garden-ink)] md:text-5xl">
               Meus Filhos
             </h1>
-            <p className="text-lg text-[var(--garden-muted)]">Jardim do Dobby, da Zara e do Paco</p>
+            <p className="text-lg text-[var(--garden-muted)]">
+              {petNames ? `Jardim de ${petNames}` : "Seu jardim"}
+            </p>
           </div>
         </div>
         <p className="flex items-center gap-2 rounded-full bg-[var(--garden-leaf-bg)] px-5 py-3 text-sm text-[var(--garden-ink)]">
-          <Leaf className="size-5 text-[var(--garden-leaf)]" /> Três personalidades, infinitos
-          momentos especiais <Heart className="size-4 fill-current text-[var(--garden-heart)]" />
+          <Leaf className="size-5 text-[var(--garden-leaf)]" /> Cada um com sua personalidade,
+          infinitos momentos especiais{" "}
+          <Heart className="size-4 fill-current text-[var(--garden-heart)]" />
         </p>
       </div>
 
@@ -329,6 +333,13 @@ export function PetsModule() {
             <ChevronRight className="size-5 text-[var(--garden-muted)]" />
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="flex min-h-24 items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-[var(--garden-line)] p-4 font-semibold text-[var(--garden-muted)] transition hover:text-[var(--garden-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--garden-leaf)]"
+        >
+          <Plus className="size-5" /> Adicionar filho
+        </button>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -459,6 +470,23 @@ export function PetsModule() {
               )}
             </section>
           ))}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={adding} onOpenChange={setAdding}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Novo filho</DialogTitle>
+          </DialogHeader>
+          <ProfileForm
+            pet={null}
+            takenSlugs={list.map((p) => p.slug)}
+            onClose={() => setAdding(false)}
+            onSaved={() => {
+              setAdding(false);
+              onChanged();
+            }}
+          />
         </DialogContent>
       </Dialog>
 
@@ -636,45 +664,50 @@ function PetCard({ pet, care, onChanged }: { pet: Pet; care: Care[]; onChanged: 
   );
 }
 
+/** Edita o perfil de um pet; sem `pet`, cadastra um pet novo. */
 function ProfileForm({
   pet,
+  takenSlugs = [],
   onClose,
   onSaved,
 }: {
-  pet: Pet;
+  pet: Pet | null;
+  takenSlugs?: string[];
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [name, setName] = useState(pet.name);
-  const [photo, setPhoto] = useState(pet.photo_url ?? "");
-  const [birth, setBirth] = useState(pet.birth_date ?? "");
+  const [name, setName] = useState(pet?.name ?? "");
+  const [photo, setPhoto] = useState(pet?.photo_url ?? "");
+  const [birth, setBirth] = useState(pet?.birth_date ?? "");
   const [weight, setWeight] = useState(
-    pet.weight_kg != null ? String(pet.weight_kg).replace(".", ",") : "",
+    pet?.weight_kg != null ? String(pet.weight_kg).replace(".", ",") : "",
   );
-  const [notes, setNotes] = useState(pet.notes ?? "");
+  const [notes, setNotes] = useState(pet?.notes ?? "");
   const [err, setErr] = useState<string | null>(null);
   const dirty =
-    name !== pet.name ||
-    photo !== (pet.photo_url ?? "") ||
-    birth !== (pet.birth_date ?? "") ||
-    notes !== (pet.notes ?? "") ||
-    weight !== (pet.weight_kg != null ? String(pet.weight_kg).replace(".", ",") : "");
+    name !== (pet?.name ?? "") ||
+    photo !== (pet?.photo_url ?? "") ||
+    birth !== (pet?.birth_date ?? "") ||
+    notes !== (pet?.notes ?? "") ||
+    weight !== (pet?.weight_kg != null ? String(pet.weight_kg).replace(".", ",") : "");
   const save = useMutation({
     mutationFn: async () => {
       if (!name.trim()) throw new Error("Informe o nome.");
       const w = weight.trim() ? Number(weight.replace(",", ".")) : null;
       if (weight.trim() && (w == null || !Number.isFinite(w) || w < 0))
         throw new Error("Peso inválido.");
-      const { error } = await supabase
-        .from("pet_profiles")
-        .update({
-          name: name.trim(),
-          photo_url: photo.trim() || null,
-          birth_date: birth || null,
-          weight_kg: w,
-          notes: notes.trim() || null,
-        })
-        .eq("id", pet.id);
+      const fields = {
+        name: name.trim(),
+        photo_url: photo.trim() || null,
+        birth_date: birth || null,
+        weight_kg: w,
+        notes: notes.trim() || null,
+      };
+      const { error } = pet
+        ? await supabase.from("pet_profiles").update(fields).eq("id", pet.id)
+        : await supabase
+            .from("pet_profiles")
+            .insert({ ...fields, slug: petSlug(fields.name, takenSlugs) });
       if (error) throw error;
     },
     onSuccess: onSaved,
@@ -789,7 +822,7 @@ function ProfileForm({
           Cancelar
         </Button>
         <Button size="sm" disabled={save.isPending} onClick={() => save.mutate()}>
-          {save.isPending ? "Salvando…" : "Salvar"}
+          {save.isPending ? "Salvando…" : pet ? "Salvar" : "Cadastrar"}
         </Button>
       </div>
     </div>

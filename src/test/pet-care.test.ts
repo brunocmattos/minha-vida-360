@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { careStatus, careScheduleDate } from "@/lib/pet-care";
+import { careStatus, careScheduleDate, petSlug } from "@/lib/pet-care";
 
 describe("Cuidados sem inferir aplicações", () => {
   it("vacina vencida permanece pendência, sem data de aplicação ou validade inferida", () => {
@@ -33,5 +33,19 @@ describe("Cuidados sem inferir aplicações", () => {
     expect(
       careStatus({ overdue_since: null, done_date: null, next_date: "2026-10-27" }, "2026-10-28"),
     ).toBe("atrasado");
+  });
+});
+
+describe("Pet novo", () => {
+  it("gera o identificador a partir do nome, sem acento nem espaço", () => {
+    expect(petSlug("Mel", [])).toBe("mel");
+    expect(petSlug("  Pé de Moleque ", [])).toBe("pe-de-moleque");
+  });
+  it("não repete identificador já usado", () => {
+    expect(petSlug("Zara", ["dobby", "zara", "paco"])).toBe("zara-2");
+    expect(petSlug("Zara", ["zara", "zara-2"])).toBe("zara-3");
+  });
+  it("nome só com símbolos ainda gera um identificador", () => {
+    expect(petSlug("!!!", [])).toBe("pet");
   });
 });
