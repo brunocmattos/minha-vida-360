@@ -38,7 +38,7 @@ jobs:
             --schema=public --no-owner --no-privileges \
             --format=custom --file="comtay-$(date +%F).dump"
           ls -lh *.dump
-          /usr/lib/postgresql/17/bin/pg_restore -l *.dump | grep -c "TABLE DATA public" | xargs -I{} sh -c 'test {} -ge 17 || { echo "Backup incompleto: {} tabelas"; exit 1; }'
+          /usr/lib/postgresql/17/bin/pg_restore -l *.dump | grep -c "TABLE DATA public" | xargs -I{} sh -c 'test {} -ge 19 || { echo "Backup incompleto: {} tabelas"; exit 1; }'
 
       - uses: actions/upload-artifact@v4
         with:

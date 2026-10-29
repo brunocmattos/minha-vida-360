@@ -15,6 +15,8 @@ export const TABLES = [
   "tasks",
   "task_completions",
   "diary_entries",
+  "shopping_items",
+  "home_maintenance",
   "luisa_conversations",
   "luisa_messages",
 ];

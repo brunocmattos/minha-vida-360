@@ -117,7 +117,7 @@ export const AREAS: Area[] = [
     short: "Casa",
     icon: Home,
     tone: "cream",
-    description: "Limpeza, manutenções e compras com frequências flexíveis.",
+    description: "Rotinas de limpeza, lista de compras e manutenções, com histórico.",
     planned: [
       "Tarefas recorrentes flexíveis",
       "Última execução e histórico",

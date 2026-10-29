@@ -6,6 +6,7 @@ import { SoftCard } from "@/components/cards";
 import { FinanceModule } from "@/components/finance-module";
 import { PetsModule } from "@/components/pets-module";
 import { DiaryModule } from "@/components/diary-module";
+import { CasaModule } from "@/components/casa-module";
 import { RoomScene, roomFor } from "@/components/room-scene";
 import { pageTitle } from "@/lib/brand";
 
@@ -70,6 +71,8 @@ function AreaPage() {
       <PetsModule />
     ) : slug === "diario" ? (
       <DiaryModule />
+    ) : slug === "casa" ? (
+      <CasaModule />
     ) : (
       <SoftCard>
         <div className="mb-4 flex items-center gap-2 text-sm font-bold text-primary">

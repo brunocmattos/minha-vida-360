@@ -11,6 +11,8 @@ import {
 } from "@/lib/luisa";
 import { summarizeMonth, monthOf, addMonths, type Entry } from "@/lib/finance";
 import { APP_NAME } from "@/lib/brand";
+import { nextDueDate, type Recurrence } from "@/lib/recurrence";
+import { withoutMissing } from "@/lib/casa";
 
 const DAILY_LIMIT = 150;
 const LLM_UNAVAILABLE = "A Luísa não conseguiu responder agora. Tente de novo em instantes.";
@@ -60,7 +62,49 @@ async function buildContext(supabase: SupabaseClient<Database>): Promise<string>
     `Hoje é ${today} (fuso America/Sao_Paulo). Competência atual: ${month}.`,
     finLine,
     careLine,
+    await casaContext(supabase),
   ].join("\n");
+}
+
+/** Tarefas abertas (com id, para a Luísa concluir a certa), lista de compras e manutenções. */
+async function casaContext(supabase: SupabaseClient<Database>): Promise<string> {
+  const [tasks, shop, maint] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("id, title, area_slug, due_date, recurrence")
+      .eq("done", false)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(40),
+    supabase.from("shopping_items").select("name, quantity").is("bought_at", null).limit(40),
+    supabase
+      .from("home_maintenance")
+      .select("title, scheduled_date")
+      .is("done_date", null)
+      .limit(10),
+  ]);
+  const unavailable = (what: string) =>
+    `${what}: INDISPONÍVEL agora (erro ao consultar). Não invente; diga que não conseguiu consultar.`;
+  const taskLine = tasks.error
+    ? unavailable("Tarefas abertas")
+    : tasks.data.length
+      ? `Tarefas abertas (id entre colchetes):\n${tasks.data
+          .map(
+            (t) =>
+              `- [${t.id}] ${t.title}${t.area_slug ? ` · área ${t.area_slug}` : ""}${t.due_date ? ` · vence ${t.due_date}` : ""}${t.recurrence !== "none" ? ` · repete ${t.recurrence}` : ""}`,
+          )
+          .join("\n")}`
+      : "Nenhuma tarefa aberta.";
+  const shopLine = shop.error
+    ? unavailable("Lista de compras")
+    : shop.data.length
+      ? `Lista de compras (faltando): ${shop.data.map((i) => (i.quantity ? `${i.name} (${i.quantity})` : i.name)).join(", ")}`
+      : "Lista de compras vazia.";
+  const maintLine = maint.error
+    ? unavailable("Manutenções da casa")
+    : maint.data.length
+      ? `Manutenções da casa pendentes: ${maint.data.map((m) => (m.scheduled_date ? `${m.title} (${m.scheduled_date})` : m.title)).join(", ")}`
+      : "Nenhuma manutenção da casa pendente.";
+  return [taskLine, shopLine, maintLine].join("\n");
 }
 
 const SYSTEM = `Você é a Luísa, assistente pessoal da usuária no app ${APP_NAME}. Tom acolhedor, objetivo, em português brasileiro. Nunca invente valores, datas ou fatos.
@@ -76,11 +120,16 @@ Exemplo de json com ação:
 Ações graváveis (somente estas):
 1. Despesa avulsa: {"type":"criar_despesa","description":"...","amount":123.45,"date":"aaaa-mm-dd"} — amount em reais (número), date opcional (se omitida, usa hoje). Só inclua a action se tiver descrição E valor; se faltar valor, pergunte no reply e use {"type":"none"}. Se a data for futura, a despesa entra como prevista (ainda não paga); se for hoje ou passada, entra como paga.
 2. Registro de diário: {"type":"registrar_diario","content":"...","date":"aaaa-mm-dd","area_slug":"opcional"} — content é o texto do registro.
+3. Tarefa ou lembrete: {"type":"criar_tarefa","title":"...","date":"aaaa-mm-dd","area_slug":"casa","recurrence":"none"} — date é o dia em que deve ser feita (opcional); recurrence é "none", "daily", "alternate", "weekly" ou "monthly". Ex.: "me lembra de trocar a roupa de cama no sábado" → criar_tarefa com a data do próximo sábado e area_slug "casa".
+4. Tarefa feita: {"type":"concluir_tarefa","title":"...","task_id":"id da lista de tarefas abertas","area_slug":"casa"} — se a usuária fez algo que está nas tarefas abertas, use o id exato dela; se não estiver na lista, omita task_id (fica registrado como feito). Ex.: "hoje limpei a cozinha".
+5. Lista de compras: {"type":"adicionar_compra","items":[{"name":"sabão em pó","quantity":"1"}]} — quantity opcional. Ex.: "comprar sabão em pó", "acabou o café".
+Áreas válidas para area_slug: casa, carro, saude, financas, cachorros, diario, carreira, desenvolvimento, autocuidado, intelecto, espiritualidade, social.
 
 Regras:
 - Pedidos sobre pets (vacina, vermífugo, banho, peso): NÃO crie action. Explique no reply que a atualização de cuidados dos filhos ainda é feita na página Meus Filhos, e oriente a abrir a área.
 - Consultas (resumo do mês, cuidados pendentes): responda com os dados do contexto, action {"type":"none"}.
-- Tarefas, receitas e demais módulos: ainda não graváveis pelo chat; diga isso com honestidade.
+- Receitas, manutenções da casa e demais módulos: ainda não graváveis pelo chat; diga isso com honestidade.
+- Uma ação por resposta. Se a usuária pedir duas coisas, prepare a primeira e diga que a outra vem em seguida.
 - Nunca confirme gravação no reply: a gravação só acontece depois que a usuária confirmar o resumo no app. Diga algo como "preparei o registro, confirma?".
 
 Contexto atual:`;
@@ -257,6 +306,31 @@ export const luisaConfirm = createServerFn({ method: "POST" })
         area_slug: action.area_slug ?? null,
       });
       if (error) failure = "Não consegui gravar o registro do diário.";
+    } else if (action.type === "criar_tarefa") {
+      const { error } = await supabase.from("tasks").insert({
+        title: action.title!,
+        area_slug: action.area_slug ?? null,
+        due_date: action.date ?? null,
+        recurrence: action.recurrence ?? "none",
+      });
+      if (error) failure = "Não consegui criar a tarefa.";
+    } else if (action.type === "concluir_tarefa") {
+      failure = await completeTask(supabase, action, today);
+    } else if (action.type === "adicionar_compra") {
+      const { data: missing, error: readErr } = await supabase
+        .from("shopping_items")
+        .select("name")
+        .is("bought_at", null);
+      const items = withoutMissing(
+        action.items ?? [],
+        (missing ?? []).map((i) => i.name),
+      );
+      const { error } = readErr
+        ? { error: readErr }
+        : items.length
+          ? await supabase.from("shopping_items").insert(items)
+          : { error: null };
+      if (error) failure = "Não consegui pôr os itens na lista de compras.";
     }
 
     if (failure) {
@@ -266,3 +340,42 @@ export const luisaConfirm = createServerFn({ method: "POST" })
     }
     return { status: "confirmada" as const };
   });
+
+/** Conclui a tarefa indicada (rotina avança pra próxima data) ou, sem tarefa, registra como feito. */
+async function completeTask(
+  supabase: SupabaseClient<Database>,
+  action: LuisaAction,
+  today: string,
+): Promise<string | null> {
+  const fail = "Não consegui marcar a tarefa como feita.";
+  const { data: task, error } = action.task_id
+    ? await supabase
+        .from("tasks")
+        .select("id, done, due_date, recurrence")
+        .eq("id", action.task_id)
+        .maybeSingle()
+    : { data: null, error: null };
+  if (error) return fail;
+  if (task && !task.done && task.recurrence !== "none") {
+    const next = nextDueDate(
+      task.recurrence as Recurrence,
+      today,
+      task.due_date ? Number(task.due_date.slice(8, 10)) : undefined,
+    );
+    const { error: e } = await supabase.rpc("complete_recurring_task", {
+      p_task_id: task.id,
+      p_next_due: next!,
+    });
+    return e ? fail : null;
+  }
+  if (task && !task.done) {
+    const { error: e } = await supabase.from("tasks").update({ done: true }).eq("id", task.id);
+    return e ? fail : null;
+  }
+  if (task?.done) return null; // já estava feita: nada a gravar
+  // não está na lista: fica registrado como feito (entra no histórico da área)
+  const { error: e } = await supabase
+    .from("tasks")
+    .insert({ title: action.title!, area_slug: action.area_slug ?? null, done: true });
+  return e ? fail : null;
+}

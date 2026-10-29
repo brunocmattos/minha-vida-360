@@ -63,14 +63,16 @@ node scripts/local-supabase.mjs dev         # app em http://localhost:8080 apont
 
 - `src/routes/` — páginas (rotas por arquivo). `_authenticated/` exige login. `casa.tsx` é a home.
 - `src/components/` — módulos de tela: `finance-*.tsx`, `pets-module.tsx`, `task-checklist.tsx`,
-  `diary-module.tsx`, `luisa-chat.tsx`, `house-casa.tsx` (casa em SVG), `room-scene.tsx`.
+  `casa-module.tsx` (área Casa), `diary-module.tsx`, `luisa-chat.tsx`, `house-casa.tsx` (casa em SVG),
+  `room-scene.tsx`.
   `components/ui/` tem só `button` e `dialog` (shadcn; adicione outros com `npx shadcn add` se precisar).
 - `src/lib/` — regras de negócio puras e testadas (`finance.ts`, `finance-balances.ts`,
-  `recurrence.ts`, `pet-care.ts`, `luisa.ts`), `areas.ts` (as 12 áreas da vida) e `fetch-all.ts`.
+  `recurrence.ts`, `pet-care.ts`, `payslip.ts`, `casa.ts`, `luisa.ts`), `areas.ts` (as 12 áreas da
+  vida) e `fetch-all.ts`.
 - `src/lib/luisa.functions.ts` — **única** função de servidor (chamada de IA + gravação confirmada).
 - `src/styles.css` — cores e tema (tokens OKLCH), paleta da casa, tema por cômodo.
 - `src/assets/pets/` — ilustrações dos pets.
-- `drizzle/migrations/` — esquema do banco (17 tabelas, todas com RLS por `owner_id`). Fonte da verdade do schema.
+- `drizzle/migrations/` — esquema do banco (19 tabelas, todas com RLS por `owner_id`). Fonte da verdade do schema.
 - `scripts/` — `local-supabase.mjs` (dev local), `export-data.mjs` / `import-data.mjs` (mudar de banco).
 - `.github/workflows/backup.yml` — backup diário do banco (precisa do segredo `DATABASE_URL`).
 - `src/lib/brand.ts` — nome do app (`APP_NAME`), títulos de página e o domínio do login por nome.

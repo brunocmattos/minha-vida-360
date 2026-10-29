@@ -137,12 +137,14 @@ function TaskFields({ v, set }: { v: Fields; set: (f: Fields) => void }) {
   );
 }
 
-export function TaskChecklist() {
+/** Lista de tarefas. Com `area`, mostra só as daquela área e as novas já nascem nela (ex.: Casa). */
+export function TaskChecklist({ area }: { area?: string } = {}) {
+  const blank: Fields = area ? { ...EMPTY, area_slug: area } : EMPTY;
   const qc = useQueryClient();
-  const [form, setForm] = useState<Fields>(EMPTY);
+  const [form, setForm] = useState<Fields>(blank);
   const [more, setMore] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [edit, setEdit] = useState<Fields>(EMPTY);
+  const [edit, setEdit] = useState<Fields>(blank);
   const [err, setErr] = useState("");
   const [showDone, setShowDone] = useState(false);
   const q = useQuery({ queryKey: KEY, queryFn: fetchTasks });
@@ -158,7 +160,7 @@ export function TaskChecklist() {
       if (error) throw error;
     },
     onSuccess: () => {
-      setForm(EMPTY);
+      setForm(blank);
       setMore(false);
       return refresh();
     },
@@ -221,14 +223,15 @@ export function TaskChecklist() {
   }
 
   const today = todaySP();
-  const pending = (q.data ?? [])
+  const all = (q.data ?? []).filter((t) => !area || t.area_slug === area);
+  const pending = all
     .filter((t) => !t.done)
     .sort(
       (a, b) =>
         (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") ||
         PRIO_ORDER[a.priority] - PRIO_ORDER[b.priority],
     );
-  const completed = (q.data ?? [])
+  const completed = all
     .filter((t) => t.done)
     .sort((a, b) => (b.completed_at ?? "").localeCompare(a.completed_at ?? ""));
 
@@ -277,8 +280,8 @@ export function TaskChecklist() {
               variant="ghost"
               type="button"
               onClick={() => {
-                if (confirmDiscard(JSON.stringify(form) !== JSON.stringify(EMPTY))) {
-                  setForm(EMPTY);
+                if (confirmDiscard(JSON.stringify(form) !== JSON.stringify(blank))) {
+                  setForm(blank);
                   setMore(false);
                 }
               }}
