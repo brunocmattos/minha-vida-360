@@ -7,7 +7,7 @@ no_ar: não
 atividade: ativo
 stack: ["TanStack Start", "React 19", "Supabase", "Tailwind 4", "Vercel"]
 ultima_atividade: 2026-10-29
-proxima_acao: "Tayane: responder 1.1–1.4 da entrevista (contas, senha, dia da mudança, grátis/pago) + mandar extrato Santander; depois SETUP"
+proxima_acao: "Tayane: seguir docs/COMO-CONTINUAR.md (receber o repo, colocar no ar pelo SETUP, depois Carro e Saúde)"
 repo: git+remote
 tags: [pessoal, lovable-export, vercel, supabase]
 ---
@@ -15,6 +15,10 @@ tags: [pessoal, lovable-export, vercel, supabase]
 # comtay (ex-Minha Vida 360)
 
 ## Estado atual
+
+**2026-10-29 — projeto passado pra Tayane.** Ela continua com o Claude Code dela; guia passo a passo
+em [docs/COMO-CONTINUAR.md](docs/COMO-CONTINUAR.md). Quem decide produto é ela; siga a intenção dela em
+[docs/RESPOSTAS-TAYANE.md](docs/RESPOSTAS-TAYANE.md).
 
 **2026-10-23 — entrevista com a Tayane respondida** ([docs/RESPOSTAS-TAYANE.md](docs/RESPOSTAS-TAYANE.md)):
 o app passa a se chamar **comtay** (domínio pretendido comtay.com.br), a Luísa vira o centro (registrar
@@ -95,8 +99,8 @@ Ela não é desenvolvedora e usa o Claude Code (muitas vezes pelo celular). Ent�
 
 ## Ambiente & acessos
 
-- Repositório: https://github.com/brunocmattos/minha-vida-360 (privado, branch `main`). Cópia com o
-  histórico inteiro do antigo `brunooutcore/minha-vida-360` (conta de trabalho), que não é mais usado.
+- Repositório: `minha-vida-360` (privado, branch `main`). Hoje em `brunocmattos`, a ser transferido pra
+  conta da Tayane. Cópia com o histórico inteiro do antigo `brunooutcore/minha-vida-360`, que não é mais usado.
 - Variáveis do app (Vercel / `.env`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
   `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; Luísa: `LLM_API_KEY` (+ opcionais `LLM_BASE_URL`,
   padrão `https://api.deepseek.com`, e `LLM_MODEL`, padrão `deepseek-flash`).
